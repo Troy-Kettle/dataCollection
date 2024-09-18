@@ -7,41 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Heart Rate Fuzzy Membership Function</h1>
-        <form id="heartRateForm">
-            <h3>Low Heart Rate:</h3>
-            <label for="lowMin">Min:</label>
-            <input type="number" id="lowMin" name="lowMin" required><br>
-            <label for="lowMax">Max:</label>
-            <input type="number" id="lowMax" name="lowMax" required><br>
-
-            <h3>Normal Heart Rate:</h3>
-            <label for="normalMin">Min:</label>
-            <input type="number" id="normalMin" name="normalMin" required><br>
-            <label for="normalMax">Max:</label>
-            <input type="number" id="normalMax" name="normalMax" required><br>
-
-            <h3>High 1 Heart Rate:</h3>
-            <label for="high1Min">Min:</label>
-            <input type="number" id="high1Min" name="high1Min" required><br>
-            <label for="high1Max">Max:</label>
-            <input type="number" id="high1Max" name="high1Max" required><br>
-
-            <h3>High 2 Heart Rate:</h3>
-            <label for="high2Min">Min:</label>
-            <input type="number" id="high2Min" name="high2Min" required><br>
-            <label for="high2Max">Max:</label>
-            <input type="number" id="high2Max" name="high2Max" required><br>
-
-            <button type="submit">Submit</button>
-        </form>
-
-        <div id="output">
-            <h2>Membership Function</h2>
-            <canvas id="membershipCanvas"></canvas>
-        </div>
-    </div>
+    <form id="heartRateForm">
+        <label for="lowMin">Low Min:</label>
+        <input type="number" id="lowMin" required>
+        <label for="lowMax">Low Max:</label>
+        <input type="number" id="lowMax" required>
+    
+        <label for="normalMin">Normal Min:</label>
+        <input type="number" id="normalMin" required>
+        <label for="normalMax">Normal Max:</label>
+        <input type="number" id="normalMax" required>
+    
+        <label for="high1Min">High 1 Min:</label>
+        <input type="number" id="high1Min" required>
+        <label for="high1Max">High 1 Max:</label>
+        <input type="number" id="high1Max" required>
+    
+        <label for="high2Min">High 2 Min:</label>
+        <input type="number" id="high2Min" required>
+        <label for="high2Max">High 2 Max:</label>
+        <input type="number" id="high2Max" required>
+    
+        <button type="submit">Plot Membership Functions</button>
+    </form>
+    <canvas id="membershipCanvas" width="600" height="400"></canvas>
 
     <script src="script.js"></script>
 </body>
