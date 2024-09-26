@@ -145,6 +145,51 @@
             border-radius: 4px;
             border: 1px solid #ccc;
         }
+        /* Part 3 Styles */
+        #part3Container {
+            margin-top: 50px;
+        }
+        .combination {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .combination h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .combination-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .combination-table th, .combination-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .combination-table th {
+            background-color: #f9f9f9;
+        }
+        .slider-container {
+            margin-top: 20px;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .slider-container input[type="range"] {
+            width: 100%;
+        }
+        .slider-container span {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -154,6 +199,10 @@
     <!-- Part 2: Further Interpretation of Vital Signs -->
     <h2>Part 2: Further Interpretation of Vital Signs</h2>
     <div id="part2Container"></div>
+
+    <!-- Part 3: Combinations of vital signs -->
+    <h2>Part 3: Combinations of Vital Signs</h2>
+    <div id="part3Container"></div>
 
     <button id="submitButton">Submit</button>
 
@@ -230,6 +279,8 @@
         ];
 
         const frequencyOptions = ["never", "rarely", "sometimes", "often", "always"];
+
+        const vitalSignMap = {};
 
         function createVitalSignElement(vitalSign) {
             const container = document.createElement('div');
@@ -495,11 +546,37 @@
                    '#e74c3c';
         }
 
+        function getModerateConcernThreshold(vitalSign, direction) {
+            const values = vitalSign.getValues().map(parseFloat);
+
+            if (vitalSign.hasBothDirections) {
+                if (direction === 'high') {
+                    return values[5]; // defaultValues[5], start of moderate concern (high)
+                } else if (direction === 'low') {
+                    return values[2]; // defaultValues[2], end of moderate concern (low)
+                }
+            } else {
+                if (vitalSign.reverseScale) {
+                    // Worse values are lower
+                    if (direction === 'low') {
+                        return values[1]; // defaultValues[1], start of moderate concern (low)
+                    }
+                } else {
+                    // Worse values are higher
+                    if (direction === 'high') {
+                        return values[1]; // defaultValues[1], start of moderate concern (high)
+                    }
+                }
+            }
+            return null;
+        }
+
         function collectData() {
-            const data = [];
+            const data = {};
+            data.thresholds = [];
             vitalSignsData.forEach(vitalSign => {
                 const values = vitalSign.getValues();
-                data.push({
+                data.thresholds.push({
                     'Vital Sign': vitalSign.name,
                     'Unit': vitalSign.unit,
                     'Values': values.join(';')
@@ -509,6 +586,10 @@
             // Collect responses from Part 2
             const part2Responses = [];
             vitalSignsData.forEach(vitalSign => {
+                if (vitalSign.name === "Inspired Oxygen" && vitalSign.unit === "%") {
+                    // Skip duplicate Inspired Oxygen entry
+                    return;
+                }
                 const response = {
                     'Vital Sign': vitalSign.name,
                     'Questions': {}
@@ -519,8 +600,20 @@
                 });
                 part2Responses.push(response);
             });
+            data.part2Responses = part2Responses;
 
-            return { thresholds: data, part2Responses: part2Responses };
+            // Collect ratings from Part 3
+            const part3Ratings = combinations.map((combination, index) => {
+                const sliderInput = document.querySelector(`input[name="combination-${index}"]`);
+                const rating = sliderInput.value;
+                return {
+                    'Combination': index + 1,
+                    'Rating': rating
+                };
+            });
+            data.part3Ratings = part3Ratings;
+
+            return data;
         }
 
         function downloadCSV(data) {
@@ -540,6 +633,13 @@
                 csvContent += '\n';
             });
 
+            // Add Part 3 ratings
+            csvContent += '\nPart 3 Ratings\n';
+            csvContent += 'Combination,Rating\n';
+            data.part3Ratings.forEach(row => {
+                csvContent += `${row['Combination']},${row['Rating']}\n`;
+            });
+
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
             link.setAttribute('href', encodedUri);
@@ -554,6 +654,7 @@
         vitalSignsData.forEach(vitalSign => {
             const vitalSignElement = createVitalSignElement(vitalSign);
             vitalSignsContainer.appendChild(vitalSignElement);
+            vitalSignMap[vitalSign.name] = vitalSign;
         });
 
         // Create Part 2 Section
@@ -595,6 +696,152 @@
             });
 
             part2Container.appendChild(questionSet);
+        });
+
+        // Part 3: Combinations of vital signs using user's data
+        const combinations = [
+            {
+                'Heart Rate': { value: 105, abnormal: true },
+                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 105, abnormal: true },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 22, abnormal: true },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 105, abnormal: true },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 38.1, abnormal: true },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 105, abnormal: true },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 94, abnormal: true }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
+                'Respiratory Rate': { value: 22, abnormal: true },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 38.1, abnormal: true },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 94, abnormal: true }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 22, abnormal: true },
+                'Temperature': { value: 38.1, abnormal: true },
+                'Oxygen Saturations': { value: 98, abnormal: false }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 22, abnormal: true },
+                'Temperature': { value: 36.5, abnormal: false },
+                'Oxygen Saturations': { value: 94, abnormal: true }
+            },
+            {
+                'Heart Rate': { value: 75, abnormal: false },
+                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
+                'Respiratory Rate': { value: 18, abnormal: false },
+                'Temperature': { value: 38.1, abnormal: true },
+                'Oxygen Saturations': { value: 94, abnormal: true }
+            }
+        ];
+
+        function createCombinationElement(combination, index) {
+            const container = document.createElement('div');
+            container.className = 'combination';
+
+            const title = document.createElement('h3');
+            title.textContent = `Combination ${index + 1}`;
+            container.appendChild(title);
+
+            const table = document.createElement('table');
+            table.className = 'combination-table';
+            const tbody = document.createElement('tbody');
+
+            Object.keys(combination).forEach(vitalSignName => {
+                const vitalSignData = combination[vitalSignName];
+                const value = vitalSignData.value;
+                const isAbnormal = vitalSignData.abnormal;
+
+                const tr = document.createElement('tr');
+
+                const tdVitalSign = document.createElement('td');
+                tdVitalSign.textContent = vitalSignName;
+                tr.appendChild(tdVitalSign);
+
+                const tdValue = document.createElement('td');
+                tdValue.textContent = value;
+                if (isAbnormal) {
+                    tdValue.style.color = 'red';
+                }
+                tr.appendChild(tdValue);
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+
+            // Slider for rating
+            const sliderContainer = document.createElement('div');
+            sliderContainer.className = 'slider-container';
+
+            const sliderLabel = document.createElement('label');
+            sliderLabel.textContent = 'Rate your level of concern (0 = No Concern, 100 = Extreme Concern):';
+            sliderContainer.appendChild(sliderLabel);
+
+            const sliderInput = document.createElement('input');
+            sliderInput.type = 'range';
+            sliderInput.min = 0;
+            sliderInput.max = 100;
+            sliderInput.value = 50;
+            sliderInput.name = `combination-${index}`;
+            sliderContainer.appendChild(sliderInput);
+
+            const sliderValueDisplay = document.createElement('span');
+            sliderValueDisplay.textContent = '50';
+            sliderContainer.appendChild(sliderValueDisplay);
+
+            sliderInput.addEventListener('input', () => {
+                sliderValueDisplay.textContent = sliderInput.value;
+            });
+
+            container.appendChild(sliderContainer);
+
+            return container;
+        }
+
+        const part3Container = document.getElementById('part3Container');
+
+        combinations.forEach((combination, index) => {
+            const combinationElement = createCombinationElement(combination, index);
+            part3Container.appendChild(combinationElement);
         });
 
         const submitButton = document.getElementById('submitButton');
