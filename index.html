@@ -15,7 +15,7 @@
             padding: 20px;
             margin: 0;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #2c3e50;
         }
@@ -27,7 +27,7 @@
             max-width: 800px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .vital-sign h2 {
+        .vital-sign h3 {
             margin-top: 0;
             color: #3498db;
         }
@@ -116,11 +116,45 @@
         .threshold-table th {
             background-color: #f9f9f9;
         }
+        /* Part 2 Styles */
+        #part2Container {
+            margin-top: 50px;
+        }
+        .question-set {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-set h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .question select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
     <h1>Vital Signs Concern Level Boundaries</h1>
     <div id="vitalSignsContainer"></div>
+
+    <!-- Part 2: Further Interpretation of Vital Signs -->
+    <h2>Part 2: Further Interpretation of Vital Signs</h2>
+    <div id="part2Container"></div>
+
     <button id="submitButton">Submit</button>
 
     <script>
@@ -187,11 +221,21 @@
             { label: 'Severe Concern', class: 'severe-concern' }
         ];
 
+        const part2Questions = [
+            "What is normal for that individual patient.",
+            "Whether the general trend is worsening or improving",
+            "Whether the abnormality has developed suddenly or gradually",
+            "Recent abnormal values, even if they have now gone back to normal",
+            "Fluctuating or variable values"
+        ];
+
+        const frequencyOptions = ["never", "rarely", "sometimes", "often", "always"];
+
         function createVitalSignElement(vitalSign) {
             const container = document.createElement('div');
             container.className = 'vital-sign';
 
-            const title = document.createElement('h2');
+            const title = document.createElement('h3');
             title.textContent = `${vitalSign.name} (${vitalSign.unit})`;
             container.appendChild(title);
 
@@ -461,19 +505,45 @@
                     'Values': values.join(';')
                 });
             });
-            return data;
+
+            // Collect responses from Part 2
+            const part2Responses = [];
+            vitalSignsData.forEach(vitalSign => {
+                const response = {
+                    'Vital Sign': vitalSign.name,
+                    'Questions': {}
+                };
+                part2Questions.forEach(question => {
+                    const select = document.querySelector(`select[name="${vitalSign.name}-${question}"]`);
+                    response['Questions'][question] = select.value;
+                });
+                part2Responses.push(response);
+            });
+
+            return { thresholds: data, part2Responses: part2Responses };
         }
 
         function downloadCSV(data) {
             let csvContent = 'data:text/csv;charset=utf-8,';
             csvContent += 'Vital Sign,Unit,Thresholds\n';
-            data.forEach(row => {
+            data.thresholds.forEach(row => {
                 csvContent += `${row['Vital Sign']},${row['Unit']},${row['Values']}\n`;
             });
+
+            // Add Part 2 responses
+            csvContent += '\nPart 2 Responses\n';
+            data.part2Responses.forEach(response => {
+                csvContent += `Vital Sign: ${response['Vital Sign']}\n`;
+                Object.keys(response['Questions']).forEach(question => {
+                    csvContent += `${question},${response['Questions'][question]}\n`;
+                });
+                csvContent += '\n';
+            });
+
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
             link.setAttribute('href', encodedUri);
-            link.setAttribute('download', 'vital_signs_thresholds.csv');
+            link.setAttribute('download', 'vital_signs_data.csv');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -484,6 +554,47 @@
         vitalSignsData.forEach(vitalSign => {
             const vitalSignElement = createVitalSignElement(vitalSign);
             vitalSignsContainer.appendChild(vitalSignElement);
+        });
+
+        // Create Part 2 Section
+        const part2Container = document.getElementById('part2Container');
+
+        vitalSignsData.forEach(vitalSign => {
+            if (vitalSign.name === "Inspired Oxygen" && vitalSign.unit === "%") {
+                // Skip duplicate Inspired Oxygen entry
+                return;
+            }
+
+            const questionSet = document.createElement('div');
+            questionSet.className = 'question-set';
+
+            const title = document.createElement('h3');
+            title.textContent = `When interpreting ${vitalSign.name}, how often do you take into account:`;
+            questionSet.appendChild(title);
+
+            part2Questions.forEach(questionText => {
+                const question = document.createElement('div');
+                question.className = 'question';
+
+                const label = document.createElement('label');
+                label.textContent = questionText;
+                label.setAttribute('for', `${vitalSign.name}-${questionText}`);
+                question.appendChild(label);
+
+                const select = document.createElement('select');
+                select.name = `${vitalSign.name}-${questionText}`;
+                frequencyOptions.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.value = optionText;
+                    option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
+                    select.appendChild(option);
+                });
+                question.appendChild(select);
+
+                questionSet.appendChild(question);
+            });
+
+            part2Container.appendChild(questionSet);
         });
 
         const submitButton = document.getElementById('submitButton');
