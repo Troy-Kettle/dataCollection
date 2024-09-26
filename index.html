@@ -63,16 +63,6 @@
             transform: translateX(-50%);
             cursor: pointer;
         }
-        .value-label {
-            position: absolute;
-            top: 0;
-            transform: translateX(-50%);
-            font-size: 0.9em;
-            background-color: #fff;
-            padding: 2px 5px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
         .labels {
             display: flex;
             justify-content: space-between;
@@ -111,6 +101,20 @@
         }
         #submitButton:hover {
             background-color: #2980b9;
+        }
+        /* Table Styles */
+        .threshold-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .threshold-table th, .threshold-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .threshold-table th {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
@@ -201,7 +205,6 @@
 
             const ranges = [];
             const thumbs = [];
-            const valueLabels = [];
 
             const defaultValues = getDefaultValues(vitalSign);
 
@@ -220,12 +223,6 @@
                 thumb.setAttribute('draggable', true);
                 scaleContainer.appendChild(thumb);
                 thumbs.push(thumb);
-
-                const valueLabel = document.createElement('div');
-                valueLabel.className = 'value-label';
-                valueLabel.textContent = formatValue(value, vitalSign);
-                scaleContainer.appendChild(valueLabel);
-                valueLabels.push(valueLabel);
 
                 thumb.addEventListener('dragstart', e => e.preventDefault());
             });
@@ -251,6 +248,29 @@
                 concernLevelsContainer.appendChild(levelDiv);
             });
             container.appendChild(concernLevelsContainer);
+
+            // Create table to display thresholds
+            const thresholdTable = document.createElement('table');
+            thresholdTable.className = 'threshold-table';
+
+            const tableHeader = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            const thresholdHeader = document.createElement('th');
+            thresholdHeader.textContent = 'Concern Level';
+
+            const valueHeader = document.createElement('th');
+            valueHeader.textContent = 'Threshold Value';
+
+            headerRow.appendChild(thresholdHeader);
+            headerRow.appendChild(valueHeader);
+            tableHeader.appendChild(headerRow);
+            thresholdTable.appendChild(tableHeader);
+
+            const tableBody = document.createElement('tbody');
+            thresholdTable.appendChild(tableBody);
+
+            container.appendChild(thresholdTable);
 
             // Initialize positions
             updatePositions();
@@ -317,8 +337,6 @@
                 defaultValues.forEach((value, index) => {
                     const percent = ((value - min) / (max - min)) * 100;
                     thumbs[index].style.left = `${percent}%`;
-                    valueLabels[index].style.left = `${percent}%`;
-                    valueLabels[index].textContent = formatValue(value, vitalSign);
                 });
 
                 ranges.forEach((range, index) => {
@@ -329,6 +347,29 @@
                     range.style.left = `${startPercent}%`;
                     range.style.width = `${endPercent - startPercent}%`;
                 });
+
+                // Update the table
+                updateThresholdTable();
+            }
+
+            function updateThresholdTable() {
+                // Clear existing table rows
+                tableBody.innerHTML = '';
+
+                // Get the concern levels
+                const levels = getConcernLevels(vitalSign);
+
+                // For each threshold, create a table row
+                for (let i = 1; i < defaultValues.length - 1; i++) {
+                    const row = document.createElement('tr');
+                    const thresholdCell = document.createElement('td');
+                    thresholdCell.textContent = levels[i - 1].label;
+                    const valueCell = document.createElement('td');
+                    valueCell.textContent = formatValue(defaultValues[i], vitalSign);
+                    row.appendChild(thresholdCell);
+                    row.appendChild(valueCell);
+                    tableBody.appendChild(row);
+                }
             }
 
             function formatValue(value, vitalSign) {
