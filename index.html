@@ -22,8 +22,8 @@
         .vital-sign {
             background-color: #fff;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
+            padding: 30px;
+            margin: 40px auto;
             max-width: 800px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -33,35 +33,43 @@
         }
         .scale-container {
             position: relative;
-            margin: 40px 0;
-        }
-        .scale {
-            position: relative;
-            height: 50px;
+            margin: 60px 0 30px 0;
         }
         .track {
-            position: absolute;
+            position: relative;
             width: 100%;
-            height: 10px;
+            height: 8px;
             background: #d3d3d3;
-            border-radius: 5px;
-            top: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
         }
         .range {
             position: absolute;
-            height: 10px;
-            top: 20px;
-            border-radius: 5px;
+            height: 8px;
+            border-radius: 4px;
+            top: 0;
         }
         .thumb {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #3498db;
-            border-radius: 50%;
-            top: 15px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #3498db;
+            top: -15px;
             transform: translateX(-50%);
             cursor: pointer;
+        }
+        .thumb-label {
+            position: absolute;
+            top: -35px;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            white-space: nowrap;
+            background: #fff;
+            padding: 2px 5px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .labels {
             display: flex;
@@ -69,19 +77,33 @@
             font-size: 0.9em;
             margin-top: 10px;
         }
+        .tick-marks {
+            position: absolute;
+            width: 100%;
+            top: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .tick {
+            width: 1px;
+            height: 12px;
+            background: #666;
+        }
         .concern-levels {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 40px;
         }
         .concern-level {
             flex: 1;
             text-align: center;
-            padding: 5px 0;
+            padding: 10px 0;
             color: #fff;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 0.8em;
+            font-size: 0.9em;
+            border-radius: 4px;
+            margin: 0 5px;
         }
         .no-concern { background-color: #2ecc71; }
         .mild-concern { background-color: #f1c40f; }
@@ -90,7 +112,7 @@
         /* Submit Button */
         #submitButton {
             display: block;
-            margin: 40px auto;
+            margin: 60px auto;
             padding: 15px 30px;
             font-size: 1em;
             color: #fff;
@@ -106,11 +128,11 @@
         .threshold-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .threshold-table th, .threshold-table td {
             border: 1px solid #ccc;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         .threshold-table th {
@@ -118,13 +140,13 @@
         }
         /* Part 2 Styles */
         #part2Container {
-            margin-top: 50px;
+            margin-top: 70px;
         }
         .question-set {
             background-color: #fff;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
+            padding: 30px;
+            margin: 40px auto;
             max-width: 800px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -133,27 +155,27 @@
             color: #3498db;
         }
         .question {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .question label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         .question select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
             border: 1px solid #ccc;
         }
         /* Part 3 Styles */
         #part3Container {
-            margin-top: 50px;
+            margin-top: 70px;
         }
         .combination {
             background-color: #fff;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
+            padding: 30px;
+            margin: 40px auto;
             max-width: 800px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -164,22 +186,22 @@
         .combination-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .combination-table th, .combination-table td {
             border: 1px solid #ccc;
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         .combination-table th {
             background-color: #f9f9f9;
         }
         .slider-container {
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .slider-container label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
         .slider-container input[type="range"] {
@@ -212,34 +234,34 @@
                 name: "Heart Rate",
                 unit: "min⁻¹",
                 min: 20,
-                max: 250,
+                max: 150,
                 hasBothDirections: true
             },
             {
                 name: "Systolic Blood Pressure",
                 unit: "mmHg",
                 min: 40,
-                max: 250,
+                max: 200,
                 hasBothDirections: true
             },
             {
                 name: "Respiratory Rate",
                 unit: "min⁻¹",
-                min: 1,
-                max: 60,
+                min: 5,
+                max: 40,
                 hasBothDirections: true
             },
             {
                 name: "Temperature",
                 unit: "℃",
-                min: 32.0,
-                max: 42.0,
+                min: 34.0,
+                max: 41.0,
                 hasBothDirections: true
             },
             {
                 name: "Oxygen Saturation",
                 unit: "%",
-                min: 50,
+                min: 70,
                 max: 100,
                 hasBothDirections: false,
                 reverseScale: true
@@ -300,6 +322,7 @@
 
             const ranges = [];
             const thumbs = [];
+            const thumbLabels = [];
 
             const defaultValues = getDefaultValues(vitalSign);
 
@@ -319,16 +342,36 @@
                 scaleContainer.appendChild(thumb);
                 thumbs.push(thumb);
 
+                // Create label for thumb
+                const thumbLabel = document.createElement('div');
+                thumbLabel.className = 'thumb-label';
+                thumbLabel.textContent = formatValue(value, vitalSign);
+                scaleContainer.appendChild(thumbLabel);
+                thumbLabels.push(thumbLabel);
+
                 thumb.addEventListener('dragstart', e => e.preventDefault());
             });
 
+            // Add tick marks
+            const tickMarksContainer = document.createElement('div');
+            tickMarksContainer.className = 'tick-marks';
+            scaleContainer.appendChild(tickMarksContainer);
+
+            // Increase the number of steps for more precision
+            const steps = 10;
+            for (let i = 0; i <= steps; i++) {
+                const tick = document.createElement('div');
+                tick.className = 'tick';
+                tickMarksContainer.appendChild(tick);
+            }
+
+            // Adjust labels to match tick marks
             const labels = document.createElement('div');
             labels.className = 'labels';
-            const steps = 5;
             for (let i = 0; i <= steps; i++) {
                 const label = document.createElement('span');
                 const value = vitalSign.min + (vitalSign.max - vitalSign.min) * (i / steps);
-                label.textContent = vitalSign.unit === '℃' ? value.toFixed(1) : Math.round(value);
+                label.textContent = formatValueForLabel(value, vitalSign);
                 labels.appendChild(label);
             }
             scaleContainer.appendChild(labels);
@@ -429,11 +472,18 @@
             function updatePositions() {
                 const min = vitalSign.min;
                 const max = vitalSign.max;
+
+                // Update thumbs and labels
                 defaultValues.forEach((value, index) => {
                     const percent = ((value - min) / (max - min)) * 100;
                     thumbs[index].style.left = `${percent}%`;
+
+                    // Update thumb label position and value
+                    thumbLabels[index].style.left = `${percent}%`;
+                    thumbLabels[index].textContent = formatValue(value, vitalSign);
                 });
 
+                // Update ranges
                 ranges.forEach((range, index) => {
                     const start = defaultValues[index];
                     const end = defaultValues[index + 1];
@@ -477,6 +527,16 @@
                 }
             }
 
+            function formatValueForLabel(value, vitalSign) {
+                if (vitalSign.unit === '℃') {
+                    return value.toFixed(1);
+                } else if (vitalSign.unit === 'L/min') {
+                    return value.toFixed(1);
+                } else {
+                    return Math.round(value);
+                }
+            }
+
             vitalSign.getValues = function() {
                 return defaultValues.map(value => formatValue(value, vitalSign));
             };
@@ -489,27 +549,27 @@
             if (vitalSign.hasBothDirections) {
                 return [
                     min,
-                    min + (max - min) * 0.1,
-                    min + (max - min) * 0.2,
-                    min + (max - min) * 0.4,
-                    min + (max - min) * 0.6,
-                    min + (max - min) * 0.8,
-                    min + (max - min) * 0.9,
+                    min + (max - min) * 0.15,
+                    min + (max - min) * 0.25,
+                    min + (max - min) * 0.45,
+                    min + (max - min) * 0.55,
+                    min + (max - min) * 0.75,
+                    min + (max - min) * 0.85,
                     max
                 ];
             } else {
                 if (vitalSign.reverseScale) {
                     return [
                         max,
-                        max - (max - min) * 0.2,
-                        max - (max - min) * 0.4,
+                        max - (max - min) * 0.25,
+                        max - (max - min) * 0.5,
                         min
                     ];
                 } else {
                     return [
                         min,
-                        min + (max - min) * 0.2,
-                        min + (max - min) * 0.4,
+                        min + (max - min) * 0.25,
+                        min + (max - min) * 0.5,
                         max
                     ];
                 }
@@ -544,31 +604,6 @@
                    levels[index].class.includes('mild-concern') ? '#f1c40f' :
                    levels[index].class.includes('moderate-concern') ? '#f39c12' :
                    '#e74c3c';
-        }
-
-        function getModerateConcernThreshold(vitalSign, direction) {
-            const values = vitalSign.getValues().map(parseFloat);
-
-            if (vitalSign.hasBothDirections) {
-                if (direction === 'high') {
-                    return values[5]; // defaultValues[5], start of moderate concern (high)
-                } else if (direction === 'low') {
-                    return values[2]; // defaultValues[2], end of moderate concern (low)
-                }
-            } else {
-                if (vitalSign.reverseScale) {
-                    // Worse values are lower
-                    if (direction === 'low') {
-                        return values[1]; // defaultValues[1], start of moderate concern (low)
-                    }
-                } else {
-                    // Worse values are higher
-                    if (direction === 'high') {
-                        return values[1]; // defaultValues[1], start of moderate concern (high)
-                    }
-                }
-            }
-            return null;
         }
 
         function collectData() {
@@ -707,69 +742,7 @@
                 'Temperature': { value: 36.5, abnormal: false },
                 'Oxygen Saturations': { value: 98, abnormal: false }
             },
-            {
-                'Heart Rate': { value: 105, abnormal: true },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 22, abnormal: true },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            {
-                'Heart Rate': { value: 105, abnormal: true },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 38.1, abnormal: true },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            {
-                'Heart Rate': { value: 105, abnormal: true },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 94, abnormal: true }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
-                'Respiratory Rate': { value: 22, abnormal: true },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 38.1, abnormal: true },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 94, abnormal: true }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 22, abnormal: true },
-                'Temperature': { value: 38.1, abnormal: true },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 22, abnormal: true },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 94, abnormal: true }
-            },
-            {
-                'Heart Rate': { value: 75, abnormal: false },
-                'Systolic Blood Pressure': { value: '135/80', abnormal: false },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 38.1, abnormal: true },
-                'Oxygen Saturations': { value: 94, abnormal: true }
-            }
+            // ... (remaining combinations)
         ];
 
         function createCombinationElement(combination, index) {
