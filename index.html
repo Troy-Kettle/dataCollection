@@ -4,78 +4,95 @@
     <meta charset="UTF-8">
     <title>Vital Signs Concern Levels</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- CSS Styles -->
     <style>
+        /* Global Styles */
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f0f4f8;
+            font-family: Arial, sans-serif;
+            background-color: #f7f9fc;
             color: #333;
-            padding: 20px;
+            padding: 0;
             margin: 0;
         }
         h1, h2 {
             text-align: center;
             color: #2c3e50;
+            margin: 40px 0 20px;
         }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* Vital Sign Styles */
         .vital-sign {
             background-color: #fff;
             border-radius: 8px;
-            padding: 30px;
-            margin: 40px auto;
-            max-width: 800px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
         .vital-sign h3 {
             margin-top: 0;
             color: #3498db;
+            font-size: 1.8em;
         }
+        /* Scale Styles */
         .scale-container {
             position: relative;
-            margin: 60px 0 30px 0;
+            margin: 60px 0 40px 0;
         }
         .track {
             position: relative;
             width: 100%;
-            height: 8px;
-            background: #d3d3d3;
-            border-radius: 4px;
-            margin: 20px 0;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            margin: 30px 0;
+            cursor: pointer;
         }
         .range {
             position: absolute;
-            height: 8px;
-            border-radius: 4px;
+            height: 12px;
+            border-radius: 6px;
             top: 0;
         }
         .thumb {
             position: absolute;
             width: 0;
             height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 15px solid #3498db;
-            top: -15px;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 18px solid #3498db;
+            top: -18px;
             transform: translateX(-50%);
             cursor: pointer;
         }
         .thumb-label {
             position: absolute;
-            top: -35px;
+            top: -55px;
             transform: translateX(-50%);
             font-size: 0.9em;
             white-space: nowrap;
             background: #fff;
-            padding: 2px 5px;
+            padding: 5px 8px;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
+        /* Tick Marks and Labels */
         .labels {
+            position: absolute;
+            width: 100%;
+            top: 40px;
             display: flex;
             justify-content: space-between;
             font-size: 0.9em;
-            margin-top: 10px;
+            pointer-events: none;
+        }
+        .labels span {
+            transform: translateX(-50%);
+            white-space: nowrap;
+            color: #555;
         }
         .tick-marks {
             position: absolute;
@@ -85,41 +102,49 @@
             justify-content: space-between;
         }
         .tick {
-            width: 1px;
-            height: 12px;
-            background: #666;
+            width: 2px;
+            background: #999;
         }
+        .tick.major {
+            height: 16px;
+        }
+        .tick.minor {
+            height: 10px;
+        }
+        /* Concern Levels */
         .concern-levels {
             display: flex;
             justify-content: space-between;
-            margin-top: 40px;
+            margin-top: 50px;
         }
         .concern-level {
             flex: 1;
             text-align: center;
-            padding: 10px 0;
+            padding: 15px 0;
             color: #fff;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 0.9em;
+            font-size: 1em;
             border-radius: 4px;
             margin: 0 5px;
+            opacity: 1;
         }
         .no-concern { background-color: #2ecc71; }
         .mild-concern { background-color: #f1c40f; }
-        .moderate-concern { background-color: #f39c12; }
+        .moderate-concern { background-color: #e67e22; }
         .severe-concern { background-color: #e74c3c; }
         /* Submit Button */
         #submitButton {
             display: block;
             margin: 60px auto;
-            padding: 15px 30px;
-            font-size: 1em;
+            padding: 18px 36px;
+            font-size: 1.2em;
             color: #fff;
             background-color: #3498db;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         #submitButton:hover {
             background-color: #2980b9;
@@ -128,81 +153,89 @@
         .threshold-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         .threshold-table th, .threshold-table td {
             border: 1px solid #ccc;
-            padding: 12px;
+            padding: 14px;
             text-align: left;
         }
         .threshold-table th {
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
+            font-weight: 700;
         }
         /* Part 2 Styles */
         #part2Container {
-            margin-top: 70px;
+            margin-top: 80px;
         }
         .question-set {
             background-color: #fff;
             border-radius: 8px;
-            padding: 30px;
-            margin: 40px auto;
-            max-width: 800px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
         .question-set h3 {
             margin-top: 0;
             color: #3498db;
+            font-size: 1.8em;
         }
         .question {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .question label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-size: 1em;
+            color: #555;
         }
         .question select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border-radius: 4px;
             border: 1px solid #ccc;
+            font-size: 1em;
+            background-color: #fff;
         }
         /* Part 3 Styles */
         #part3Container {
-            margin-top: 70px;
+            margin-top: 80px;
         }
         .combination {
             background-color: #fff;
             border-radius: 8px;
-            padding: 30px;
-            margin: 40px auto;
-            max-width: 800px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
         .combination h3 {
             margin-top: 0;
             color: #3498db;
+            font-size: 1.8em;
         }
         .combination-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         .combination-table th, .combination-table td {
             border: 1px solid #ccc;
-            padding: 12px;
+            padding: 14px;
             text-align: left;
         }
         .combination-table th {
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
+            font-weight: 700;
         }
         .slider-container {
-            margin-top: 30px;
+            margin-top: 40px;
         }
         .slider-container label {
             display: block;
             margin-bottom: 15px;
             font-weight: bold;
+            font-size: 1em;
+            color: #555;
         }
         .slider-container input[type="range"] {
             width: 100%;
@@ -211,58 +244,88 @@
             display: inline-block;
             margin-left: 10px;
             font-weight: bold;
+            font-size: 1em;
+            color: #333;
+        }
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .vital-sign, .question-set, .combination {
+                padding: 30px;
+            }
+            .thumb-label {
+                top: -50px;
+            }
+            .concern-levels {
+                flex-direction: column;
+            }
+            .concern-level {
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Vital Signs Concern Level Boundaries</h1>
-    <div id="vitalSignsContainer"></div>
+    <div class="container">
+        <h1>Vital Signs Concern Level Boundaries</h1>
+        <div id="vitalSignsContainer"></div>
 
-    <!-- Part 2: Further Interpretation of Vital Signs -->
-    <h2>Part 2: Further Interpretation of Vital Signs</h2>
-    <div id="part2Container"></div>
+        <!-- Part 2: Further Interpretation of Vital Signs -->
+        <h2>Part 2: Further Interpretation of Vital Signs</h2>
+        <div id="part2Container"></div>
 
-    <!-- Part 3: Combinations of vital signs -->
-    <h2>Part 3: Combinations of Vital Signs</h2>
-    <div id="part3Container"></div>
+        <!-- Part 3: Combinations of Vital Signs -->
+        <h2>Part 3: Combinations of Vital Signs</h2>
+        <div id="part3Container"></div>
 
-    <button id="submitButton">Submit</button>
+        <button id="submitButton">Submit</button>
+    </div>
 
     <script>
+        // Vital Signs Data
         const vitalSignsData = [
             {
                 name: "Heart Rate",
                 unit: "min⁻¹",
                 min: 20,
-                max: 150,
+                max: 250,
+                step: 1,
+                majorTick: 10,
                 hasBothDirections: true
             },
             {
                 name: "Systolic Blood Pressure",
                 unit: "mmHg",
                 min: 40,
-                max: 200,
+                max: 250,
+                step: 1,
+                majorTick: 20,
                 hasBothDirections: true
             },
             {
                 name: "Respiratory Rate",
                 unit: "min⁻¹",
-                min: 5,
-                max: 40,
+                min: 1,
+                max: 60,
+                step: 1,
+                majorTick: 5,
                 hasBothDirections: true
             },
             {
                 name: "Temperature",
                 unit: "℃",
-                min: 34.0,
-                max: 41.0,
+                min: 32.0,
+                max: 42.0,
+                step: 0.1,
+                majorTick: 1,
                 hasBothDirections: true
             },
             {
                 name: "Oxygen Saturation",
                 unit: "%",
-                min: 70,
+                min: 50,
                 max: 100,
+                step: 1,
+                majorTick: 5,
                 hasBothDirections: false,
                 reverseScale: true
             },
@@ -271,6 +334,8 @@
                 unit: "L/min",
                 min: 0,
                 max: 15,
+                step: 0.5,
+                majorTick: 5,
                 hasBothDirections: false
             },
             {
@@ -278,6 +343,8 @@
                 unit: "%",
                 min: 21,
                 max: 100,
+                step: 1,
+                majorTick: 10,
                 hasBothDirections: false
             }
         ];
@@ -302,8 +369,7 @@
 
         const frequencyOptions = ["never", "rarely", "sometimes", "often", "always"];
 
-        const vitalSignMap = {};
-
+        // Function to create vital sign elements
         function createVitalSignElement(vitalSign) {
             const container = document.createElement('div');
             container.className = 'vital-sign';
@@ -324,61 +390,22 @@
             const thumbs = [];
             const thumbLabels = [];
 
-            const defaultValues = getDefaultValues(vitalSign);
+            const levels = getConcernLevels(vitalSign);
 
-            defaultValues.forEach((value, index) => {
-                if (index < defaultValues.length - 1) {
-                    const range = document.createElement('div');
-                    range.className = 'range';
-                    range.style.backgroundColor = getConcernColor(index, vitalSign);
-                    scaleContainer.appendChild(range);
-                    ranges.push(range);
-                }
-
-                const thumb = document.createElement('div');
-                thumb.className = 'thumb';
-                thumb.dataset.index = index;
-                thumb.setAttribute('draggable', true);
-                scaleContainer.appendChild(thumb);
-                thumbs.push(thumb);
-
-                // Create label for thumb
-                const thumbLabel = document.createElement('div');
-                thumbLabel.className = 'thumb-label';
-                thumbLabel.textContent = formatValue(value, vitalSign);
-                scaleContainer.appendChild(thumbLabel);
-                thumbLabels.push(thumbLabel);
-
-                thumb.addEventListener('dragstart', e => e.preventDefault());
-            });
-
-            // Add tick marks
-            const tickMarksContainer = document.createElement('div');
-            tickMarksContainer.className = 'tick-marks';
-            scaleContainer.appendChild(tickMarksContainer);
-
-            // Increase the number of steps for more precision
-            const steps = 10;
-            for (let i = 0; i <= steps; i++) {
-                const tick = document.createElement('div');
-                tick.className = 'tick';
-                tickMarksContainer.appendChild(tick);
+            // Initialize thresholds with the same number of arrows as boundaries
+            const numBoundaries = levels.length - 1;
+            const thresholds = [];
+            thresholds.push({ value: vitalSign.min });
+            for (let i = 0; i < numBoundaries; i++) {
+                thresholds.push({ value: vitalSign.min });
             }
+            thresholds.push({ value: vitalSign.max });
 
-            // Adjust labels to match tick marks
-            const labels = document.createElement('div');
-            labels.className = 'labels';
-            for (let i = 0; i <= steps; i++) {
-                const label = document.createElement('span');
-                const value = vitalSign.min + (vitalSign.max - vitalSign.min) * (i / steps);
-                label.textContent = formatValueForLabel(value, vitalSign);
-                labels.appendChild(label);
-            }
-            scaleContainer.appendChild(labels);
+            // Add tick marks and labels
+            addTickMarksAndLabels(scaleContainer, vitalSign);
 
             const concernLevelsContainer = document.createElement('div');
             concernLevelsContainer.className = 'concern-levels';
-            const levels = getConcernLevels(vitalSign);
             levels.forEach(level => {
                 const levelDiv = document.createElement('div');
                 levelDiv.className = `concern-level ${level.class}`;
@@ -410,87 +437,113 @@
 
             container.appendChild(thresholdTable);
 
-            // Initialize positions
-            updatePositions();
+            function createThumbs() {
+                // Clear existing thumbs and ranges
+                thumbs.forEach(thumb => thumb.remove());
+                thumbLabels.forEach(label => label.remove());
+                ranges.forEach(range => range.remove());
+                thumbs.length = 0;
+                thumbLabels.length = 0;
+                ranges.length = 0;
 
-            // Event listeners
-            thumbs.forEach((thumb, index) => {
-                let isDragging = false;
-                thumb.addEventListener('mousedown', e => {
-                    isDragging = true;
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                    e.preventDefault();
+                // Recreate thumbs and labels
+                thresholds.forEach((threshold, index) => {
+                    if (index > 0 && index < thresholds.length) {
+                        const range = document.createElement('div');
+                        range.className = 'range';
+                        scaleContainer.appendChild(range);
+                        ranges.push(range);
+                    }
+
+                    if (index > 0 && index < thresholds.length - 1) {
+                        const thumb = document.createElement('div');
+                        thumb.className = 'thumb';
+                        thumb.dataset.index = index;
+                        scaleContainer.appendChild(thumb);
+                        thumbs.push(thumb);
+
+                        // Create label for thumb
+                        const thumbLabel = document.createElement('div');
+                        thumbLabel.className = 'thumb-label';
+                        thumbLabel.textContent = formatValue(threshold.value, vitalSign);
+                        scaleContainer.appendChild(thumbLabel);
+                        thumbLabels.push(thumbLabel);
+
+                        // Event listeners for thumb
+                        let isDragging = false;
+                        thumb.addEventListener('mousedown', e => {
+                            isDragging = true;
+                            document.addEventListener('mousemove', onMouseMove);
+                            document.addEventListener('mouseup', onMouseUp);
+                            e.preventDefault();
+                        });
+
+                        function onMouseMove(e) {
+                            if (!isDragging) return;
+                            const rect = track.getBoundingClientRect();
+                            let offsetX = e.clientX - rect.left;
+                            offsetX = Math.max(0, Math.min(offsetX, rect.width));
+                            const percent = offsetX / rect.width;
+                            let value = vitalSign.min + percent * (vitalSign.max - vitalSign.min);
+
+                            // Snap to nearest step
+                            value = Math.round(value / vitalSign.step) * vitalSign.step;
+                            value = Math.max(vitalSign.min, Math.min(value, vitalSign.max));
+
+                            const idx = parseInt(thumb.dataset.index);
+                            thresholds[idx].value = value;
+                            thresholds.sort((a, b) => a.value - b.value);
+                            enforceBoundaries(idx);
+                            updatePositions();
+                        }
+
+                        function onMouseUp() {
+                            isDragging = false;
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                        }
+                    }
                 });
-
-                function onMouseMove(e) {
-                    if (!isDragging) return;
-                    const rect = track.getBoundingClientRect();
-                    let offsetX = e.clientX - rect.left;
-                    offsetX = Math.max(0, Math.min(offsetX, rect.width));
-                    const percent = offsetX / rect.width;
-                    const value = vitalSign.min + percent * (vitalSign.max - vitalSign.min);
-                    defaultValues[index] = value;
-                    enforceBoundaries(index);
-                    updatePositions();
-                }
-
-                function onMouseUp() {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                }
-            });
+            }
 
             function enforceBoundaries(index) {
-                if (vitalSign.hasBothDirections) {
-                    if (index > 0 && defaultValues[index] < defaultValues[index - 1]) {
-                        defaultValues[index] = defaultValues[index - 1];
-                    }
-                    if (index < defaultValues.length - 1 && defaultValues[index] > defaultValues[index + 1]) {
-                        defaultValues[index] = defaultValues[index + 1];
-                    }
-                } else {
-                    if (vitalSign.reverseScale) {
-                        if (index > 0 && defaultValues[index] > defaultValues[index - 1]) {
-                            defaultValues[index] = defaultValues[index - 1];
-                        }
-                        if (index < defaultValues.length - 1 && defaultValues[index] < defaultValues[index + 1]) {
-                            defaultValues[index] = defaultValues[index + 1];
-                        }
-                    } else {
-                        if (index > 0 && defaultValues[index] < defaultValues[index - 1]) {
-                            defaultValues[index] = defaultValues[index - 1];
-                        }
-                        if (index < defaultValues.length - 1 && defaultValues[index] > defaultValues[index + 1]) {
-                            defaultValues[index] = defaultValues[index + 1];
-                        }
-                    }
+                const threshold = thresholds[index];
+                const prevValue = thresholds[index - 1]?.value;
+                const nextValue = thresholds[index + 1]?.value;
+
+                if (prevValue !== undefined && threshold.value <= prevValue) {
+                    threshold.value = prevValue + vitalSign.step;
+                }
+                if (nextValue !== undefined && threshold.value >= nextValue) {
+                    threshold.value = nextValue - vitalSign.step;
                 }
             }
 
             function updatePositions() {
-                const min = vitalSign.min;
-                const max = vitalSign.max;
-
                 // Update thumbs and labels
-                defaultValues.forEach((value, index) => {
-                    const percent = ((value - min) / (max - min)) * 100;
-                    thumbs[index].style.left = `${percent}%`;
+                thresholds.forEach((threshold, index) => {
+                    if (index > 0 && index < thresholds.length - 1) {
+                        const percent = ((threshold.value - vitalSign.min) / (vitalSign.max - vitalSign.min)) * 100;
+                        const thumb = thumbs.find(t => parseInt(t.dataset.index) === index);
+                        thumb.style.left = `${percent}%`;
 
-                    // Update thumb label position and value
-                    thumbLabels[index].style.left = `${percent}%`;
-                    thumbLabels[index].textContent = formatValue(value, vitalSign);
+                        // Update thumb label position and value
+                        const thumbLabel = thumbLabels[thumbs.indexOf(thumb)];
+                        thumbLabel.style.left = `${percent}%`;
+                        thumbLabel.textContent = formatValue(threshold.value, vitalSign);
+                        thumbLabel.style.display = 'block';
+                    }
                 });
 
                 // Update ranges
                 ranges.forEach((range, index) => {
-                    const start = defaultValues[index];
-                    const end = defaultValues[index + 1];
-                    const startPercent = ((start - min) / (max - min)) * 100;
-                    const endPercent = ((end - min) / (max - min)) * 100;
+                    const start = thresholds[index].value;
+                    const end = thresholds[index + 1].value;
+                    const startPercent = ((start - vitalSign.min) / (vitalSign.max - vitalSign.min)) * 100;
+                    const endPercent = ((end - vitalSign.min) / (vitalSign.max - vitalSign.min)) * 100;
                     range.style.left = `${startPercent}%`;
                     range.style.width = `${endPercent - startPercent}%`;
+                    range.style.backgroundColor = getConcernColor(index, vitalSign);
                 });
 
                 // Update the table
@@ -505,15 +558,55 @@
                 const levels = getConcernLevels(vitalSign);
 
                 // For each threshold, create a table row
-                for (let i = 1; i < defaultValues.length - 1; i++) {
+                for (let i = 1; i < thresholds.length - 1; i++) {
                     const row = document.createElement('tr');
                     const thresholdCell = document.createElement('td');
                     thresholdCell.textContent = levels[i - 1].label;
                     const valueCell = document.createElement('td');
-                    valueCell.textContent = formatValue(defaultValues[i], vitalSign);
+                    valueCell.textContent = formatValue(thresholds[i].value, vitalSign);
                     row.appendChild(thresholdCell);
                     row.appendChild(valueCell);
                     tableBody.appendChild(row);
+                }
+            }
+
+            function addTickMarksAndLabels(scaleContainer, vitalSign) {
+                const tickMarksContainer = document.createElement('div');
+                tickMarksContainer.className = 'tick-marks';
+                scaleContainer.appendChild(tickMarksContainer);
+
+                const labelsContainer = document.createElement('div');
+                labelsContainer.className = 'labels';
+                scaleContainer.appendChild(labelsContainer);
+
+                const min = vitalSign.min;
+                const max = vitalSign.max;
+                const step = vitalSign.step;
+                const majorTick = vitalSign.majorTick;
+
+                const totalSteps = Math.round((max - min) / step);
+
+                for (let i = 0; i <= totalSteps; i++) {
+                    const value = min + i * step;
+                    const percent = ((value - min) / (max - min)) * 100;
+
+                    const tick = document.createElement('div');
+                    tick.className = 'tick';
+                    tick.style.left = `${percent}%`;
+
+                    if ((value - min) % majorTick === 0) {
+                        tick.classList.add('major');
+
+                        // Add label for major tick
+                        const label = document.createElement('span');
+                        label.textContent = formatValueForLabel(value, vitalSign);
+                        label.style.left = `${percent}%`;
+                        labelsContainer.appendChild(label);
+                    } else {
+                        tick.classList.add('minor');
+                    }
+
+                    tickMarksContainer.appendChild(tick);
                 }
             }
 
@@ -528,82 +621,49 @@
             }
 
             function formatValueForLabel(value, vitalSign) {
-                if (vitalSign.unit === '℃') {
-                    return value.toFixed(1);
-                } else if (vitalSign.unit === 'L/min') {
-                    return value.toFixed(1);
+                return formatValue(value, vitalSign);
+            }
+
+            function getConcernLevels(vitalSign) {
+                if (vitalSign.hasBothDirections) {
+                    return concernLevels;
                 } else {
-                    return Math.round(value);
+                    if (vitalSign.reverseScale) {
+                        return [
+                            { label: 'Severe Concern', class: 'severe-concern' },
+                            { label: 'Moderate Concern', class: 'moderate-concern' },
+                            { label: 'No Concern', class: 'no-concern' }
+                        ];
+                    } else {
+                        return [
+                            { label: 'No Concern', class: 'no-concern' },
+                            { label: 'Moderate Concern', class: 'moderate-concern' },
+                            { label: 'Severe Concern', class: 'severe-concern' }
+                        ];
+                    }
                 }
+            }
+
+            function getConcernColor(index, vitalSign) {
+                const levels = getConcernLevels(vitalSign);
+                const levelClass = levels[index].class;
+                return levelClass === 'no-concern' ? '#2ecc71' :
+                       levelClass === 'mild-concern' ? '#f1c40f' :
+                       levelClass === 'moderate-concern' ? '#e67e22' :
+                       '#e74c3c';
             }
 
             vitalSign.getValues = function() {
-                return defaultValues.map(value => formatValue(value, vitalSign));
+                if (thresholds.length > 2) {
+                    return thresholds.slice(1, -1).map(t => formatValue(t.value, vitalSign));
+                } else {
+                    return [];
+                }
             };
 
+            createThumbs();
+            updatePositions();
             return container;
-        }
-
-        function getDefaultValues(vitalSign) {
-            const { min, max } = vitalSign;
-            if (vitalSign.hasBothDirections) {
-                return [
-                    min,
-                    min + (max - min) * 0.15,
-                    min + (max - min) * 0.25,
-                    min + (max - min) * 0.45,
-                    min + (max - min) * 0.55,
-                    min + (max - min) * 0.75,
-                    min + (max - min) * 0.85,
-                    max
-                ];
-            } else {
-                if (vitalSign.reverseScale) {
-                    return [
-                        max,
-                        max - (max - min) * 0.25,
-                        max - (max - min) * 0.5,
-                        min
-                    ];
-                } else {
-                    return [
-                        min,
-                        min + (max - min) * 0.25,
-                        min + (max - min) * 0.5,
-                        max
-                    ];
-                }
-            }
-        }
-
-        function getConcernLevels(vitalSign) {
-            if (vitalSign.hasBothDirections) {
-                return concernLevels;
-            } else {
-                if (vitalSign.reverseScale) {
-                    return [
-                        { label: 'Severe Concern', class: 'severe-concern' },
-                        { label: 'Moderate Concern', class: 'moderate-concern' },
-                        { label: 'Mild Concern', class: 'mild-concern' },
-                        { label: 'No Concern', class: 'no-concern' }
-                    ];
-                } else {
-                    return [
-                        { label: 'No Concern', class: 'no-concern' },
-                        { label: 'Mild Concern', class: 'mild-concern' },
-                        { label: 'Moderate Concern', class: 'moderate-concern' },
-                        { label: 'Severe Concern', class: 'severe-concern' }
-                    ];
-                }
-            }
-        }
-
-        function getConcernColor(index, vitalSign) {
-            const levels = getConcernLevels(vitalSign);
-            return levels[index].class.includes('no-concern') ? '#2ecc71' :
-                   levels[index].class.includes('mild-concern') ? '#f1c40f' :
-                   levels[index].class.includes('moderate-concern') ? '#f39c12' :
-                   '#e74c3c';
         }
 
         function collectData() {
@@ -689,7 +749,6 @@
         vitalSignsData.forEach(vitalSign => {
             const vitalSignElement = createVitalSignElement(vitalSign);
             vitalSignsContainer.appendChild(vitalSignElement);
-            vitalSignMap[vitalSign.name] = vitalSign;
         });
 
         // Create Part 2 Section
@@ -733,16 +792,18 @@
             part2Container.appendChild(questionSet);
         });
 
-        // Part 3: Combinations of vital signs using user's data
+        // Part 3: Combinations of vital signs
         const combinations = [
-            {
-                'Heart Rate': { value: 105, abnormal: true },
-                'Systolic Blood Pressure': { value: '100/60', abnormal: true },
-                'Respiratory Rate': { value: 18, abnormal: false },
-                'Temperature': { value: 36.5, abnormal: false },
-                'Oxygen Saturations': { value: 98, abnormal: false }
-            },
-            // ... (remaining combinations)
+            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
+            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 94, abnormal: true }}
         ];
 
         function createCombinationElement(combination, index) {
@@ -771,7 +832,8 @@
                 const tdValue = document.createElement('td');
                 tdValue.textContent = value;
                 if (isAbnormal) {
-                    tdValue.style.color = 'red';
+                    tdValue.style.color = '#e74c3c';
+                    tdValue.style.fontWeight = 'bold';
                 }
                 tr.appendChild(tdValue);
 
