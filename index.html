@@ -84,12 +84,11 @@
             position: absolute;
             width: 100%;
             top: 40px;
-            display: flex;
-            justify-content: space-between;
             font-size: 0.9em;
             pointer-events: none;
         }
         .labels span {
+            position: absolute;
             transform: translateX(-50%);
             white-space: nowrap;
             color: #555;
@@ -98,10 +97,11 @@
             position: absolute;
             width: 100%;
             top: 8px;
-            display: flex;
-            justify-content: space-between;
+            height: 16px;
+            overflow: visible;
         }
         .tick {
+            position: absolute;
             width: 2px;
             background: #999;
         }
@@ -350,13 +350,13 @@
         ];
 
         const concernLevels = [
-            { label: 'Severe Concern', class: 'severe-concern' },
-            { label: 'Moderate Concern', class: 'moderate-concern' },
-            { label: 'Mild Concern', class: 'mild-concern' },
-            { label: 'No Concern', class: 'no-concern' },
-            { label: 'Mild Concern', class: 'mild-concern' },
-            { label: 'Moderate Concern', class: 'moderate-concern' },
-            { label: 'Severe Concern', class: 'severe-concern' }
+            { label: 'Below normal range - Severe', class: 'severe-concern' },
+            { label: 'Below normal range - Moderate', class: 'moderate-concern' },
+            { label: 'Below normal range - Mild', class: 'mild-concern' },
+            { label: 'Normal range', class: 'no-concern' },
+            { label: 'Above normal range - Mild', class: 'mild-concern' },
+            { label: 'Above normal range - Moderate', class: 'moderate-concern' },
+            { label: 'Above normal range - Severe', class: 'severe-concern' }
         ];
 
         const part2Questions = [
@@ -586,6 +586,7 @@
 
                 const totalSteps = Math.round((max - min) / step);
 
+                // Add minor ticks
                 for (let i = 0; i <= totalSteps; i++) {
                     const value = min + i * step;
                     const percent = ((value - min) / (max - min)) * 100;
@@ -593,21 +594,44 @@
                     const tick = document.createElement('div');
                     tick.className = 'tick';
                     tick.style.left = `${percent}%`;
-
-                    if ((value - min) % majorTick === 0) {
-                        tick.classList.add('major');
-
-                        // Add label for major tick
-                        const label = document.createElement('span');
-                        label.textContent = formatValueForLabel(value, vitalSign);
-                        label.style.left = `${percent}%`;
-                        labelsContainer.appendChild(label);
-                    } else {
-                        tick.classList.add('minor');
-                    }
-
+                    tick.classList.add('minor');
                     tickMarksContainer.appendChild(tick);
                 }
+
+                // Add major ticks and labels
+                let currentValue = min;
+
+                // Adjust currentValue to the next multiple of majorTick
+                currentValue = min + (majorTick - (min % majorTick)) % majorTick;
+
+                while (currentValue <= max) {
+                    const percent = ((currentValue - min) / (max - min)) * 100;
+
+                    const tick = document.createElement('div');
+                    tick.className = 'tick major';
+                    tick.style.left = `${percent}%`;
+                    tickMarksContainer.appendChild(tick);
+
+                    const label = document.createElement('span');
+                    label.textContent = formatValueForLabel(currentValue, vitalSign);
+                    label.style.left = `${percent}%`;
+                    labelsContainer.appendChild(label);
+
+                    currentValue += majorTick;
+                }
+
+                // Add labels at min and max
+                const minPercent = 0;
+                const minLabel = document.createElement('span');
+                minLabel.textContent = formatValueForLabel(min, vitalSign);
+                minLabel.style.left = `${minPercent}%`;
+                labelsContainer.appendChild(minLabel);
+
+                const maxPercent = 100;
+                const maxLabel = document.createElement('span');
+                maxLabel.textContent = formatValueForLabel(max, vitalSign);
+                maxLabel.style.left = `${maxPercent}%`;
+                labelsContainer.appendChild(maxLabel);
             }
 
             function formatValue(value, vitalSign) {
@@ -630,15 +654,15 @@
                 } else {
                     if (vitalSign.reverseScale) {
                         return [
-                            { label: 'Severe Concern', class: 'severe-concern' },
-                            { label: 'Moderate Concern', class: 'moderate-concern' },
-                            { label: 'No Concern', class: 'no-concern' }
+                            { label: 'Below normal range - Severe', class: 'severe-concern' },
+                            { label: 'Below normal range - Moderate', class: 'moderate-concern' },
+                            { label: 'Below range', class: 'no-concern' }
                         ];
                     } else {
                         return [
-                            { label: 'No Concern', class: 'no-concern' },
-                            { label: 'Moderate Concern', class: 'moderate-concern' },
-                            { label: 'Severe Concern', class: 'severe-concern' }
+                            { label: 'Normal range', class: 'no-concern' },
+                            { label: 'Above normal range - Moderate', class: 'moderate-concern' },
+                            { label: 'Above normal range - Severe', class: 'severe-concern' }
                         ];
                     }
                 }
