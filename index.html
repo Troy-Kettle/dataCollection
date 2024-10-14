@@ -41,7 +41,7 @@
         .scale-container {
             position: relative;
             margin: 60px 0 40px 0;
-            height: 100px; /* Adjusted to accommodate multiple arrow levels */
+            height: 120px; /* Increased to accommodate multiple arrow levels */
         }
         .track {
             position: relative;
@@ -383,15 +383,15 @@
 
             const levels = getConcernLevels(vitalSign);
 
-            const thresholds = [];
-            const numArrows = getNumArrows(vitalSign);
+            let thresholds = [];
+            let numArrows = getNumArrows(vitalSign);
             const min = vitalSign.min;
             const max = vitalSign.max;
 
             // Initialize thresholds at initial positions
             thresholds.push({ value: min }); // thresholds[0] - fixed
             const positions = getInitialPositions(numArrows, min, max, vitalSign.step);
-            positions.forEach(pos => thresholds.push({ value: pos }));
+            positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1 }));
             thresholds.push({ value: max }); // Last threshold - fixed
 
             // Add tick marks and labels
@@ -509,6 +509,8 @@
                         let isDragging = false;
                         thumb.addEventListener('mousedown', e => {
                             isDragging = true;
+                            currentThumb = thumb;
+                            currentThumbIndex = parseInt(thumb.dataset.index);
                             document.addEventListener('mousemove', onMouseMove);
                             document.addEventListener('mouseup', onMouseUp);
                             e.preventDefault();
@@ -526,9 +528,8 @@
                             value = Math.round(value / vitalSign.step) * vitalSign.step;
                             value = Math.max(min, Math.min(value, max));
 
-                            const idx = parseInt(thumb.dataset.index);
-                            thresholds[idx].value = value;
-                            enforceBoundaries(idx);
+                            thresholds[currentThumbIndex].value = value;
+                            enforceBoundaries(currentThumbIndex);
                             updatePositions();
                         }
 
@@ -551,25 +552,12 @@
 
             function enforceBoundaries(index) {
                 const threshold = thresholds[index];
-                const prevValue = thresholds[index - 1]?.value;
-                const nextValue = thresholds[index + 1]?.value;
 
-                if (prevValue !== undefined && threshold.value <= prevValue) {
-                    threshold.value = prevValue + vitalSign.step;
-                }
-                if (nextValue !== undefined && threshold.value >= nextValue) {
-                    threshold.value = nextValue - vitalSign.step;
-                }
-
-                // Ensure normal range is at least one unit wide
-                if (vitalSign.hasBothDirections && index >= 3 && index <= 4) {
-                    if (thresholds[4].value - thresholds[3].value < vitalSign.step) {
-                        if (index === 3) {
-                            thresholds[3].value = thresholds[4].value - vitalSign.step;
-                        } else {
-                            thresholds[4].value = thresholds[3].value + vitalSign.step;
-                        }
-                    }
+                // Ensure thresholds stay within min and max
+                if (threshold.value < min) {
+                    threshold.value = min;
+                } else if (threshold.value > max) {
+                    threshold.value = max;
                 }
             }
 
@@ -578,11 +566,11 @@
                 thresholds.forEach((threshold, index) => {
                     if (index > 0 && index < thresholds.length - 1) {
                         const percent = ((threshold.value - min) / (max - min)) * 100;
-                        const thumb = thumbs.find(t => parseInt(t.dataset.index) === index);
+                        const thumb = thumbs[index - 1];
                         thumb.style.left = `${percent}%`;
 
                         // Update thumb label position and value
-                        const thumbLabel = thumbLabels[thumbs.indexOf(thumb)];
+                        const thumbLabel = thumbLabels[index - 1];
                         thumbLabel.style.left = `${percent}%`;
                         thumbLabel.textContent = formatValue(threshold.value, vitalSign);
                         thumbLabel.style.display = 'block';
@@ -591,13 +579,23 @@
 
                 // Update ranges
                 ranges.forEach((range, index) => {
-                    const start = thresholds[index].value;
-                    const end = thresholds[index + 1].value;
-                    const startPercent = ((start - min) / (max - min)) * 100;
-                    const endPercent = ((end - min) / (max - min)) * 100;
-                    range.style.left = `${startPercent}%`;
-                    range.style.width = `${endPercent - startPercent}%`;
+                    let start = thresholds[index].value;
+                    let end = thresholds[index + 1].value;
+                    let startPercent = ((start - min) / (max - min)) * 100;
+                    let endPercent = ((end - min) / (max - min)) * 100;
+                    let width = endPercent - startPercent;
+                    let left = startPercent;
+
+                    // Handle negative width (overlapping thresholds)
+                    if (width < 0) {
+                        width = -width;
+                        left = endPercent;
+                    }
+
+                    range.style.left = `${left}%`;
+                    range.style.width = `${width}%`;
                     range.style.backgroundColor = levels[index].color;
+                    range.style.zIndex = 1; // Ensure ranges don't overlap visually
                 });
 
                 // Update tick marks colors
@@ -620,14 +618,17 @@
                 // Clear existing table rows
                 tableBody.innerHTML = '';
 
-                // For each range, create a table row
-                for (let i = 0; i < levels.length; i++) {
+                // Merge overlapping ranges
+                const mergedRanges = mergeOverlappingRanges(thresholds, levels);
+
+                // For each merged range, create a table row
+                mergedRanges.forEach(range => {
                     const row = document.createElement('tr');
                     const levelCell = document.createElement('td');
-                    levelCell.textContent = levels[i].label;
+                    levelCell.textContent = range.level.label;
 
-                    const lowerLimit = i === 0 ? '' : formatValue(thresholds[i].value, vitalSign);
-                    const upperLimit = i === levels.length - 1 ? '' : formatValue(thresholds[i + 1].value, vitalSign);
+                    const lowerLimit = formatValue(range.start, vitalSign);
+                    const upperLimit = formatValue(range.end, vitalSign);
 
                     const lowerCell = document.createElement('td');
                     lowerCell.textContent = lowerLimit;
@@ -635,17 +636,56 @@
                     const upperCell = document.createElement('td');
                     upperCell.textContent = upperLimit;
 
-                    // If the range is eliminated (arrows overlapped), leave cells blank
-                    if (lowerLimit === upperLimit) {
-                        lowerCell.textContent = '';
-                        upperCell.textContent = '';
-                    }
-
                     row.appendChild(levelCell);
                     row.appendChild(lowerCell);
                     row.appendChild(upperCell);
                     tableBody.appendChild(row);
+                });
+            }
+
+            function mergeOverlappingRanges(thresholds, levels) {
+                const rangesList = [];
+
+                // Build initial ranges
+                for (let i = 0; i < thresholds.length - 1; i++) {
+                    const start = thresholds[i].value;
+                    const end = thresholds[i + 1].value;
+                    const level = levels[i];
+
+                    rangesList.push({
+                        start: Math.min(start, end),
+                        end: Math.max(start, end),
+                        level: level
+                    });
                 }
+
+                // Sort ranges by start value
+                rangesList.sort((a, b) => a.start - b.start);
+
+                // Merge overlapping ranges
+                const mergedRanges = [];
+                let currentRange = rangesList[0];
+
+                for (let i = 1; i < rangesList.length; i++) {
+                    const range = rangesList[i];
+                    if (currentRange.end >= range.start) {
+                        // Overlapping ranges, merge them if they have the same level
+                        if (currentRange.level.label === range.level.label) {
+                            currentRange.end = Math.max(currentRange.end, range.end);
+                        } else {
+                            // Different levels, split at overlap point
+                            mergedRanges.push(currentRange);
+                            currentRange = range;
+                        }
+                    } else {
+                        // No overlap, push current range and move to next
+                        mergedRanges.push(currentRange);
+                        currentRange = range;
+                    }
+                }
+                mergedRanges.push(currentRange);
+
+                return mergedRanges;
             }
 
             function formatValue(value, vitalSign) {
@@ -684,11 +724,12 @@
             }
 
             function getTickColor(value, thresholds, levels) {
-                for (let i = 0; i < thresholds.length - 1; i++) {
-                    const lowerLimit = thresholds[i].value;
-                    const upperLimit = thresholds[i + 1].value;
-                    if (value >= lowerLimit && value < upperLimit) {
-                        return levels[i].color;
+                // Merge overlapping ranges
+                const mergedRanges = mergeOverlappingRanges(thresholds, levels);
+
+                for (const range of mergedRanges) {
+                    if (value >= range.start && value < range.end) {
+                        return range.level.color;
                     }
                 }
                 return '#999';
@@ -751,6 +792,9 @@
                     return [];
                 }
             };
+
+            let currentThumb = null;
+            let currentThumbIndex = null;
 
             createThumbs();
             updatePositions();
@@ -839,7 +883,7 @@
             vitalSignsContainer.appendChild(vitalSignElement);
         });
 
-        // Part 3 Questions (previously Part 2)
+        // Part 3 Questions
         const part3Questions = [
             "What is normal for that individual patient.",
             "Whether the general trend is worsening or improving",
@@ -893,7 +937,7 @@
             part3Container.appendChild(questionSet);
         });
 
-        // Part 2: Combinations of vital signs (previously Part 3)
+        // Part 2: Combinations of vital signs
         const combinations = [
             {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
             {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
