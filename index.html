@@ -388,11 +388,11 @@
             const min = vitalSign.min;
             const max = vitalSign.max;
 
-            // Initialize thresholds at initial positions
-            thresholds.push({ value: min }); // thresholds[0] - fixed
+            // Initialize thresholds at random positions
+            thresholds.push({ value: min, levelIndex: 0, lastAdjusted: false }); // thresholds[0] - fixed
             const positions = getInitialPositions(numArrows, min, max, vitalSign.step);
-            positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1 }));
-            thresholds.push({ value: max }); // Last threshold - fixed
+            positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1, lastAdjusted: false }));
+            thresholds.push({ value: max, levelIndex: levels.length - 1, lastAdjusted: false }); // Last threshold - fixed
 
             // Add tick marks and labels
             const tickMarksContainer = document.createElement('div');
@@ -530,8 +530,13 @@
 
                             thresholds[currentThumbIndex].value = value;
 
-                            // Enforce pushing other thumbs
+                            // Enforce boundaries
                             enforceBoundaries(currentThumbIndex, value);
+
+                            // Set lastAdjusted
+                            thresholds.forEach((t, idx) => {
+                                t.lastAdjusted = (idx === currentThumbIndex);
+                            });
 
                             updatePositions();
                         }
@@ -565,17 +570,17 @@
                     threshold.value = value;
                 }
 
-                // Push neighboring thumbs if overlapping
+                // Prevent thresholds from crossing over
                 if (index > 0) {
-                    if (thresholds[index - 1].value >= threshold.value) {
-                        thresholds[index - 1].value = threshold.value - vitalSign.step;
+                    if (thresholds[index - 1].value > threshold.value) {
+                        thresholds[index - 1].value = threshold.value;
                         enforceBoundaries(index - 1, thresholds[index - 1].value);
                     }
                 }
 
                 if (index < thresholds.length - 1) {
-                    if (thresholds[index + 1].value <= threshold.value) {
-                        thresholds[index + 1].value = threshold.value + vitalSign.step;
+                    if (thresholds[index + 1].value < threshold.value) {
+                        thresholds[index + 1].value = threshold.value;
                         enforceBoundaries(index + 1, thresholds[index + 1].value);
                     }
                 }
@@ -597,26 +602,65 @@
                     }
                 });
 
-                // Update ranges
-                ranges.forEach((range, index) => {
-                    let start = thresholds[index].value;
-                    let end = thresholds[index + 1].value;
-                    let startPercent = ((start - min) / (max - min)) * 100;
-                    let endPercent = ((end - min) / (max - min)) * 100;
-                    let width = endPercent - startPercent;
-                    let left = startPercent;
+                // Build merged ranges
+                const mergedRanges = [];
+                let i = 0;
+                while (i < thresholds.length - 1) {
+                    let startThreshold = thresholds[i];
+                    let endIndex = i + 1;
 
-                    range.style.left = `${left}%`;
-                    range.style.width = `${width}%`;
-                    range.style.backgroundColor = levels[index].color;
-                    range.style.zIndex = 1; // Ensure ranges don't overlap visually
+                    // Merge ranges where thresholds have the same value
+                    while (endIndex < thresholds.length && thresholds[endIndex].value === thresholds[i].value) {
+                        endIndex++;
+                    }
+
+                    // Determine concern level
+                    let levelIndex = thresholds[i].levelIndex;
+                    if (endIndex - i > 1) {
+                        for (let j = i; j < endIndex; j++) {
+                            if (thresholds[j].lastAdjusted) {
+                                levelIndex = thresholds[j].levelIndex;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Create range
+                    let startValue = thresholds[i].value;
+                    let endValue = thresholds[endIndex] ? thresholds[endIndex].value : thresholds[thresholds.length - 1].value;
+                    let startPercent = ((startValue - min) / (max - min)) * 100;
+                    let endPercent = ((endValue - min) / (max - min)) * 100;
+                    let width = endPercent - startPercent;
+
+                    mergedRanges.push({
+                        left: startPercent,
+                        width: width,
+                        levelIndex: levelIndex
+                    });
+
+                    i = endIndex;
+                }
+
+                // Update ranges
+                ranges.forEach(range => range.remove());
+                ranges.length = 0;
+
+                mergedRanges.forEach(rangeData => {
+                    const range = document.createElement('div');
+                    range.className = 'range';
+                    range.style.left = `${rangeData.left}%`;
+                    range.style.width = `${rangeData.width}%`;
+                    range.style.backgroundColor = levels[rangeData.levelIndex].color;
+                    range.style.zIndex = 1;
+                    scaleContainer.appendChild(range);
+                    ranges.push(range);
                 });
 
                 // Update tick marks colors
                 updateTickMarksColor();
 
                 // Update the table
-                updateThresholdTable();
+                updateThresholdTable(mergedRanges);
             }
 
             function updateTickMarksColor() {
@@ -628,18 +672,18 @@
                 });
             }
 
-            function updateThresholdTable() {
+            function updateThresholdTable(mergedRanges) {
                 // Clear existing table rows
                 tableBody.innerHTML = '';
 
-                // For each range, create a table row
-                for (let i = 0; i < ranges.length; i++) {
+                // For each merged range, create a table row
+                mergedRanges.forEach(rangeData => {
                     const row = document.createElement('tr');
                     const levelCell = document.createElement('td');
-                    levelCell.textContent = levels[i].label;
+                    levelCell.textContent = levels[rangeData.levelIndex].label;
 
-                    const lowerLimit = formatValue(thresholds[i].value, vitalSign);
-                    const upperLimit = formatValue(thresholds[i + 1].value, vitalSign);
+                    const lowerLimit = formatValue(min + (rangeData.left / 100) * (max - min), vitalSign);
+                    const upperLimit = formatValue(min + ((rangeData.left + rangeData.width) / 100) * (max - min), vitalSign);
 
                     const lowerCell = document.createElement('td');
                     lowerCell.textContent = lowerLimit;
@@ -651,7 +695,7 @@
                     row.appendChild(lowerCell);
                     row.appendChild(upperCell);
                     tableBody.appendChild(row);
-                }
+                });
             }
 
             function formatValue(value, vitalSign) {
@@ -694,7 +738,7 @@
                     const lowerLimit = thresholds[i].value;
                     const upperLimit = thresholds[i + 1].value;
                     if (value >= lowerLimit && value <= upperLimit) {
-                        return levels[i].color;
+                        return levels[thresholds[i].levelIndex].color;
                     }
                 }
                 return '#999';
@@ -740,14 +784,16 @@
                 }
             }
 
-            // Function to initialize arrows at positions evenly distributed across the range
+            // Function to initialize arrows at random positions within the range
             function getInitialPositions(numArrows, min, max, step) {
                 const positions = [];
-                const interval = (max - min) / (numArrows + 1);
-                for (let i = 1; i <= numArrows; i++) {
-                    positions.push(min + i * interval);
+                for (let i = 0; i < numArrows; i++) {
+                    const randomValue = min + Math.random() * (max - min);
+                    const snappedValue = Math.max(min, Math.min(Math.round(randomValue / step) * step, max));
+                    positions.push(snappedValue);
                 }
-                return positions.map(pos => Math.round(pos / step) * step);
+                // Sort positions to prevent overlapping thresholds
+                return positions.sort((a, b) => a - b);
             }
 
             vitalSign.getValues = function() {
