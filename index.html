@@ -529,7 +529,10 @@
                             value = Math.max(min, Math.min(value, max));
 
                             thresholds[currentThumbIndex].value = value;
-                            enforceBoundaries(currentThumbIndex);
+
+                            // Enforce pushing other thumbs
+                            enforceBoundaries(currentThumbIndex, value);
+
                             updatePositions();
                         }
 
@@ -550,14 +553,31 @@
                 }
             }
 
-            function enforceBoundaries(index) {
+            function enforceBoundaries(index, value) {
                 const threshold = thresholds[index];
 
                 // Ensure thresholds stay within min and max
-                if (threshold.value < min) {
+                if (value < min) {
                     threshold.value = min;
-                } else if (threshold.value > max) {
+                } else if (value > max) {
                     threshold.value = max;
+                } else {
+                    threshold.value = value;
+                }
+
+                // Push neighboring thumbs if overlapping
+                if (index > 0) {
+                    if (thresholds[index - 1].value >= threshold.value) {
+                        thresholds[index - 1].value = threshold.value - vitalSign.step;
+                        enforceBoundaries(index - 1, thresholds[index - 1].value);
+                    }
+                }
+
+                if (index < thresholds.length - 1) {
+                    if (thresholds[index + 1].value <= threshold.value) {
+                        thresholds[index + 1].value = threshold.value + vitalSign.step;
+                        enforceBoundaries(index + 1, thresholds[index + 1].value);
+                    }
                 }
             }
 
@@ -586,12 +606,6 @@
                     let width = endPercent - startPercent;
                     let left = startPercent;
 
-                    // Handle negative width (overlapping thresholds)
-                    if (width < 0) {
-                        width = -width;
-                        left = endPercent;
-                    }
-
                     range.style.left = `${left}%`;
                     range.style.width = `${width}%`;
                     range.style.backgroundColor = levels[index].color;
@@ -618,17 +632,14 @@
                 // Clear existing table rows
                 tableBody.innerHTML = '';
 
-                // Merge overlapping ranges
-                const mergedRanges = mergeOverlappingRanges(thresholds, levels);
-
-                // For each merged range, create a table row
-                mergedRanges.forEach(range => {
+                // For each range, create a table row
+                for (let i = 0; i < ranges.length; i++) {
                     const row = document.createElement('tr');
                     const levelCell = document.createElement('td');
-                    levelCell.textContent = range.level.label;
+                    levelCell.textContent = levels[i].label;
 
-                    const lowerLimit = formatValue(range.start, vitalSign);
-                    const upperLimit = formatValue(range.end, vitalSign);
+                    const lowerLimit = formatValue(thresholds[i].value, vitalSign);
+                    const upperLimit = formatValue(thresholds[i + 1].value, vitalSign);
 
                     const lowerCell = document.createElement('td');
                     lowerCell.textContent = lowerLimit;
@@ -640,52 +651,7 @@
                     row.appendChild(lowerCell);
                     row.appendChild(upperCell);
                     tableBody.appendChild(row);
-                });
-            }
-
-            function mergeOverlappingRanges(thresholds, levels) {
-                const rangesList = [];
-
-                // Build initial ranges
-                for (let i = 0; i < thresholds.length - 1; i++) {
-                    const start = thresholds[i].value;
-                    const end = thresholds[i + 1].value;
-                    const level = levels[i];
-
-                    rangesList.push({
-                        start: Math.min(start, end),
-                        end: Math.max(start, end),
-                        level: level
-                    });
                 }
-
-                // Sort ranges by start value
-                rangesList.sort((a, b) => a.start - b.start);
-
-                // Merge overlapping ranges
-                const mergedRanges = [];
-                let currentRange = rangesList[0];
-
-                for (let i = 1; i < rangesList.length; i++) {
-                    const range = rangesList[i];
-                    if (currentRange.end >= range.start) {
-                        // Overlapping ranges, merge them if they have the same level
-                        if (currentRange.level.label === range.level.label) {
-                            currentRange.end = Math.max(currentRange.end, range.end);
-                        } else {
-                            // Different levels, split at overlap point
-                            mergedRanges.push(currentRange);
-                            currentRange = range;
-                        }
-                    } else {
-                        // No overlap, push current range and move to next
-                        mergedRanges.push(currentRange);
-                        currentRange = range;
-                    }
-                }
-                mergedRanges.push(currentRange);
-
-                return mergedRanges;
             }
 
             function formatValue(value, vitalSign) {
@@ -724,12 +690,11 @@
             }
 
             function getTickColor(value, thresholds, levels) {
-                // Merge overlapping ranges
-                const mergedRanges = mergeOverlappingRanges(thresholds, levels);
-
-                for (const range of mergedRanges) {
-                    if (value >= range.start && value < range.end) {
-                        return range.level.color;
+                for (let i = 0; i < thresholds.length - 1; i++) {
+                    const lowerLimit = thresholds[i].value;
+                    const upperLimit = thresholds[i + 1].value;
+                    if (value >= lowerLimit && value <= upperLimit) {
+                        return levels[i].color;
                     }
                 }
                 return '#999';
