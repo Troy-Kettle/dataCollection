@@ -898,7 +898,7 @@
         const part3Questions = [
             "What is normal for that individual patient.",
             "Whether the general trend is worsening or improving",
-            "Whether the abnormality has developed suddenly or gradually"
+            "Abnormal values that have occurred within the past 24 hours"
         ];
 
         // Create Part 3 Section (Further Interpretation)
@@ -909,8 +909,13 @@
             questionSet.className = 'question-set';
 
             const title = document.createElement('h3');
-            title.textContent = `When interpreting ${vitalSign.name}, how often do you take into account:`;
+            title.textContent = `When interpreting ${vitalSign.name}, how important is it to take account of:`;
             questionSet.appendChild(title);
+
+            // Add subheading
+            const subheading = document.createElement('h4');
+            subheading.innerHTML = '0 = not at all important<br> 5 = moderately important<br> 10 = Extremely important:';
+            questionSet.appendChild(subheading);
 
             part3Questions.forEach(questionText => {
                 const question = document.createElement('div');
