@@ -950,16 +950,16 @@
 
         // Part 2: Combinations of vital signs
         const combinations = [
-            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 98, abnormal: false }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 94, abnormal: true }},
-            {'Heart Rate': { value: 75, abnormal: false }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 38.1, abnormal: true }, 'Oxygen Saturation': { value: 94, abnormal: true }}
+            {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: 'Normal', abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+            {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }}
         ];
 
         function createCombinationElement(combination, index) {
@@ -1004,7 +1004,7 @@
             sliderContainer.className = 'slider-container';
 
             const sliderLabel = document.createElement('label');
-            sliderLabel.textContent = 'Rate your level of concern (0 = No Concern, 10 = Extreme Concern):';
+            sliderLabel.innerHTML = 'Rate your level of concern:<br>0 = No more concerning than the individual abnormalities<br>5 = Moderately more concerning than individual abnormalities<br>10 = The combination is very much more concerning than the individual abnormalities';
             sliderContainer.appendChild(sliderLabel);
 
             const sliderInput = document.createElement('input');
