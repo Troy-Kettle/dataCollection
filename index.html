@@ -187,39 +187,6 @@
         #part2Container {
             margin-top: 80px;
         }
-        .question-set {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 40px;
-            margin: 40px 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-        .question-set h3 {
-            margin-top: 0;
-            color: #3498db;
-            font-size: 1.8em;
-        }
-        .question {
-            margin-bottom: 25px;
-        }
-        .question label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1em;
-            color: #555;
-        }
-        .question select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 1em;
-            background-color: #fff;
-        }
-        /* Part 3 Styles */
-        #part3Container {
-            margin-top: 80px;
-        }
         .combination {
             background-color: #fff;
             border-radius: 8px;
@@ -266,6 +233,42 @@
             font-size: 1em;
             color: #333;
         }
+        /* Part 3 Styles */
+        #part3Container {
+            margin-top: 80px;
+        }
+        .question-set {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .question-set h3 {
+            margin-top: 0;
+            color: #3498db;
+            font-size: 1.8em;
+        }
+        .question {
+            margin-bottom: 25px;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1em;
+            color: #555;
+        }
+        .question .slider-container {
+            display: flex;
+            align-items: center;
+        }
+        .question .slider-container input[type="range"] {
+            flex: 1;
+        }
+        .question .slider-container span {
+            margin-left: 10px;
+            font-weight: bold;
+        }
         /* Responsive Design */
         @media screen and (max-width: 768px) {
             .vital-sign, .question-set, .combination {
@@ -288,12 +291,12 @@
         <h1>Vital Signs Concern Level Boundaries</h1>
         <div id="vitalSignsContainer"></div>
 
-        <!-- Part 2: Further Interpretation of Vital Signs -->
-        <h2>Part 2: Further Interpretation of Vital Signs</h2>
+        <!-- Part 2: Combinations of Vital Signs -->
+        <h2>Part 2: Combinations of Vital Signs</h2>
         <div id="part2Container"></div>
 
-        <!-- Part 3: Combinations of Vital Signs -->
-        <h2>Part 3: Combinations of Vital Signs</h2>
+        <!-- Part 3: Further Interpretation of Vital Signs -->
+        <h2>Part 3: Further Interpretation of Vital Signs</h2>
         <div id="part3Container"></div>
 
         <button id="submitButton">Submit</button>
@@ -349,8 +352,6 @@
                 reverseScale: true
             }
         ];
-
-        const frequencyOptions = ["never", "rarely", "sometimes", "often", "always"];
 
         // Function to create vital sign elements
         function createVitalSignElement(vitalSign) {
@@ -715,7 +716,7 @@
                 }
             }
 
-            // Updated function to initialize arrows at random positions
+            // Function to initialize arrows at random positions
             function getInitialPositions(numArrows, min, max, step) {
                 const positions = [];
                 const totalSteps = Math.floor((max - min) / step);
@@ -768,23 +769,23 @@
                 });
             });
 
-            // Collect responses from Part 2
-            const part2Responses = [];
+            // Collect responses from Part 3
+            const part3Responses = [];
             vitalSignsData.forEach(vitalSign => {
                 const response = {
                     'Vital Sign': vitalSign.name,
                     'Questions': {}
                 };
-                part2Questions.forEach(question => {
-                    const select = document.querySelector(`select[name="${vitalSign.name}-${question}"]`);
-                    response['Questions'][question] = select.value;
+                part3Questions.forEach(question => {
+                    const sliderInput = document.querySelector(`input[name="${vitalSign.name}-${question}"]`);
+                    response['Questions'][question] = sliderInput.value;
                 });
-                part2Responses.push(response);
+                part3Responses.push(response);
             });
-            data.part2Responses = part2Responses;
+            data.part3Responses = part3Responses;
 
-            // Collect ratings from Part 3
-            const part3Ratings = combinations.map((combination, index) => {
+            // Collect ratings from Part 2
+            const part2Ratings = combinations.map((combination, index) => {
                 const sliderInput = document.querySelector(`input[name="combination-${index}"]`);
                 const rating = sliderInput.value;
                 return {
@@ -792,7 +793,7 @@
                     'Rating': rating
                 };
             });
-            data.part3Ratings = part3Ratings;
+            data.part2Ratings = part2Ratings;
 
             return data;
         }
@@ -804,9 +805,9 @@
                 csvContent += `${row['Vital Sign']},${row['Unit']},${row['Values']}\n`;
             });
 
-            // Add Part 2 responses
-            csvContent += '\nPart 2 Responses\n';
-            data.part2Responses.forEach(response => {
+            // Add Part 3 responses
+            csvContent += '\nPart 3 Responses\n';
+            data.part3Responses.forEach(response => {
                 csvContent += `Vital Sign: ${response['Vital Sign']}\n`;
                 Object.keys(response['Questions']).forEach(question => {
                     csvContent += `${question},${response['Questions'][question]}\n`;
@@ -814,10 +815,10 @@
                 csvContent += '\n';
             });
 
-            // Add Part 3 ratings
-            csvContent += '\nPart 3 Ratings\n';
+            // Add Part 2 ratings
+            csvContent += '\nPart 2 Ratings\n';
             csvContent += 'Combination,Rating\n';
-            data.part3Ratings.forEach(row => {
+            data.part2Ratings.forEach(row => {
                 csvContent += `${row['Combination']},${row['Rating']}\n`;
             });
 
@@ -837,17 +838,15 @@
             vitalSignsContainer.appendChild(vitalSignElement);
         });
 
-        // Part 2 Questions
-        const part2Questions = [
+        // Part 3 Questions (previously Part 2)
+        const part3Questions = [
             "What is normal for that individual patient.",
             "Whether the general trend is worsening or improving",
-            "Whether the abnormality has developed suddenly or gradually",
-            "Recent abnormal values, even if they have now gone back to normal",
-            "Fluctuating or variable values"
+            "Whether the abnormality has developed suddenly or gradually"
         ];
 
-        // Create Part 2 Section
-        const part2Container = document.getElementById('part2Container');
+        // Create Part 3 Section (Further Interpretation)
+        const part3Container = document.getElementById('part3Container');
 
         vitalSignsData.forEach(vitalSign => {
             const questionSet = document.createElement('div');
@@ -857,7 +856,7 @@
             title.textContent = `When interpreting ${vitalSign.name}, how often do you take into account:`;
             questionSet.appendChild(title);
 
-            part2Questions.forEach(questionText => {
+            part3Questions.forEach(questionText => {
                 const question = document.createElement('div');
                 question.className = 'question';
 
@@ -866,23 +865,34 @@
                 label.setAttribute('for', `${vitalSign.name}-${questionText}`);
                 question.appendChild(label);
 
-                const select = document.createElement('select');
-                select.name = `${vitalSign.name}-${questionText}`;
-                frequencyOptions.forEach(optionText => {
-                    const option = document.createElement('option');
-                    option.value = optionText;
-                    option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
-                    select.appendChild(option);
-                });
-                question.appendChild(select);
+                // Create slider
+                const sliderContainer = document.createElement('div');
+                sliderContainer.className = 'slider-container';
 
+                const sliderInput = document.createElement('input');
+                sliderInput.type = 'range';
+                sliderInput.min = 0;
+                sliderInput.max = 10;
+                sliderInput.value = 5;
+                sliderInput.name = `${vitalSign.name}-${questionText}`;
+                sliderContainer.appendChild(sliderInput);
+
+                const sliderValueDisplay = document.createElement('span');
+                sliderValueDisplay.textContent = '5';
+                sliderContainer.appendChild(sliderValueDisplay);
+
+                sliderInput.addEventListener('input', () => {
+                    sliderValueDisplay.textContent = sliderInput.value;
+                });
+
+                question.appendChild(sliderContainer);
                 questionSet.appendChild(question);
             });
 
-            part2Container.appendChild(questionSet);
+            part3Container.appendChild(questionSet);
         });
 
-        // Part 3: Combinations of vital signs
+        // Part 2: Combinations of vital signs (previously Part 3)
         const combinations = [
             {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '100/60', abnormal: true }, 'Respiratory Rate': { value: 18, abnormal: false }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
             {'Heart Rate': { value: 105, abnormal: true }, 'Blood Pressure': { value: '135/80', abnormal: false }, 'Respiratory Rate': { value: 22, abnormal: true }, 'Temperature': { value: 36.5, abnormal: false }, 'Oxygen Saturation': { value: 98, abnormal: false }},
@@ -933,24 +943,25 @@
             table.appendChild(tbody);
             container.appendChild(table);
 
-            // Slider for rating
+            // Slider for rating (0 to 10)
             const sliderContainer = document.createElement('div');
             sliderContainer.className = 'slider-container';
 
             const sliderLabel = document.createElement('label');
-            sliderLabel.textContent = 'Rate your level of concern (0 = No Concern, 100 = Extreme Concern):';
+            sliderLabel.textContent = 'Rate your level of concern (0 = No Concern, 10 = Extreme Concern):';
             sliderContainer.appendChild(sliderLabel);
 
             const sliderInput = document.createElement('input');
             sliderInput.type = 'range';
             sliderInput.min = 0;
-            sliderInput.max = 100;
-            sliderInput.value = 50;
+            sliderInput.max = 10;
+            sliderInput.value = 5;
+            sliderInput.step = 0.1;
             sliderInput.name = `combination-${index}`;
             sliderContainer.appendChild(sliderInput);
 
             const sliderValueDisplay = document.createElement('span');
-            sliderValueDisplay.textContent = '50';
+            sliderValueDisplay.textContent = '5';
             sliderContainer.appendChild(sliderValueDisplay);
 
             sliderInput.addEventListener('input', () => {
@@ -962,11 +973,11 @@
             return container;
         }
 
-        const part3Container = document.getElementById('part3Container');
+        const part2Container = document.getElementById('part2Container');
 
         combinations.forEach((combination, index) => {
             const combinationElement = createCombinationElement(combination, index);
-            part3Container.appendChild(combinationElement);
+            part2Container.appendChild(combinationElement);
         });
 
         const submitButton = document.getElementById('submitButton');
