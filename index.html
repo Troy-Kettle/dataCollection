@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><a href="index.html">Signs Survey</a></title>
+    <title>Vital Signs Survey - Consent & Basic Info</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Link to CSS Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,12 +13,172 @@
     <div class="container">
         <h1>Welcome to the Vital Signs Survey</h1>
         <p>This survey aims to understand how healthcare professionals interpret vital signs. Your responses will help improve patient care.</p>
-        <p>Please click the button below to begin.</p>
-        <div class="navigation-buttons" style="justify-content: center;">
-            <a href="part1.html">
-                <button>Start Survey</button>
-            </a>
-        </div>
+        <p>Please read and agree to the statements below before starting the survey.</p>
+
+        <!-- Start of the form -->
+        <form id="consentForm">
+            <fieldset>
+                <legend>Consent Form</legend>
+
+                <!-- Consent 1 -->
+                <label>
+                    <input type="checkbox" name="consent1" required>
+                    I confirm that I have read and understand the information given above.
+                </label>
+                <br>
+
+                <!-- Consent 2 -->
+                <label>
+                    <input type="checkbox" name="consent2" required>
+                    I understand that my participation is voluntary and that I am free to withdraw at any time, without giving any reason, and without my medical care or legal rights being affected.
+                </label>
+                <br>
+
+                <!-- Consent 3 -->
+                <label>
+                    <input type="checkbox" name="consent3" required>
+                    I agree to take part in the above study.
+                </label>
+                <br>
+            </fieldset>
+
+            <!-- Basic Info Section -->
+            <fieldset>
+                <legend>Basic Information</legend>
+
+                <!-- Screening Question 1 -->
+                <label for="experience">
+                    Are you a registered Doctor or Nurse with at least 2 years of clinical experience?
+                </label>
+                <select id="experience" name="experience" required>
+                    <option value="">--Select an option--</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+                <br>
+
+                <!-- Screening Question 2 -->
+                <label for="location">
+                    Do you currently live and work in England or Wales?
+                </label>
+                <select id="location" name="location" required>
+                    <option value="">--Select an option--</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+                <br>
+
+                <!-- Question 3 -->
+                <label for="role">
+                    Please indicate which best describes your role:
+                </label>
+                <select id="role" name="role" required>
+                    <option value="">--Select your role--</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="acp">Advanced Clinical Practitioner</option>
+                    <option value="specialist_nurse">Specialist Nurse</option>
+                    <option value="cc_outreach_nurse">Critical Care Outreach Nurse</option>
+                    <option value="hhn_coordinator">Hospital at Night coordinator</option>
+                </select>
+                <br>
+
+                <!-- Question 4 -->
+                <label for="specialty">
+                    Please indicate which best describes the specialty in which you currently work:
+                </label>
+                <select id="specialty" name="specialty" required>
+                    <option value="">--Select your specialty--</option>
+                    <option value="medicine">Medicine</option>
+                    <option value="surgery">Surgery</option>
+                    <option value="critical_care">Critical Care</option>
+                    <option value="other">Other</option>
+                </select>
+                <br>
+
+                <!-- Question 5 -->
+                <label for="experience_years">
+                    How many years of clinical experience do you have?
+                </label>
+                <select id="experience_years" name="experience_years" required>
+                    <option value="">--Select your experience level--</option>
+                    <option value="2-5">2-5 years</option>
+                    <option value="6-10">6-10 years</option>
+                    <option value="11-15">11-15 years</option>
+                    <option value="greater_than_15">Greater than 15 years</option>
+                </select>
+                <br>
+            </fieldset>
+
+            <!-- Submit button -->
+            <div class="navigation-buttons">
+                <button type="submit">Start Survey</button>
+            </div>
+        </form>
     </div>
+    <script>
+        document.getElementById('consentForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting
+    
+            // Collect Consent Form Data
+            const consent1Element = document.querySelector('input[name="consent1"]');
+            const consent2Element = document.querySelector('input[name="consent2"]');
+            const consent3Element = document.querySelector('input[name="consent3"]');
+            
+            const consent1Checked = consent1Element ? consent1Element.checked : null;
+            const consent2Checked = consent2Element ? consent2Element.checked : null;
+            const consent3Checked = consent3Element ? consent3Element.checked : null;
+    
+            if (consent1Checked === null || consent2Checked === null || consent3Checked === null) {
+                console.error('Error: One or more consent checkboxes are not found.');
+                alert('Please make sure you have agreed to all consent items.');
+                return; // Don't proceed if the consent checkboxes are not available
+            }
+    
+            const consentData = {
+                consent1: consent1Checked ? 'Consented' : 'Not Consented',
+                consent2: consent2Checked ? 'Consented' : 'Not Consented',
+                consent3: consent3Checked ? 'Consented' : 'Not Consented'
+            };
+    
+            // Collect Screening Questions
+            const experienceElement = document.querySelector('select[name="experience"]');
+            const locationElement = document.querySelector('select[name="location"]');
+            const roleElement = document.querySelector('select[name="role"]');
+            const specialtyElement = document.querySelector('select[name="specialty"]');
+            const experienceYearsElement = document.querySelector('select[name="experience_years"]');
+    
+            const experience = experienceElement ? experienceElement.value : null;
+            const location = locationElement ? locationElement.value : null;
+            const role = roleElement ? roleElement.value : null;
+            const specialty = specialtyElement ? specialtyElement.value : null;
+            const experience_years = experienceYearsElement ? experienceYearsElement.value : null;
+    
+            // Check if all required fields are filled in
+            if (!experience || !location || !role || !specialty || !experience_years) {
+                alert('Please complete all required fields in the Basic Information section.');
+                return; // Don't proceed if any required field is missing
+            }
+    
+            const basicInfoData = {
+                experience: experience || 'No selection',
+                location: location || 'No selection',
+                role: role || 'No selection',
+                specialty: specialty || 'No selection',
+                experience_years: experience_years || 'No selection'
+            };
+    
+            // Save Consent and Basic Info Data to localStorage
+            localStorage.setItem('consentData', JSON.stringify(consentData));
+            localStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
+    
+            // Debugging output to ensure proper storage
+            console.log('Consent Data: ', consentData);
+            console.log('Basic Info Data: ', basicInfoData);
+    
+            // Now proceed to the next page
+            window.location.href = 'part1.html';
+        });
+    </script>
 </body>
 </html>
