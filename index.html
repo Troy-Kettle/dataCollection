@@ -5,6 +5,27 @@
     <title>Vital Signs Survey - Consent & Basic Info</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUqolrnw7CQ-_bPWx0bbSPBEK4MNgkgmo",
+            authDomain: "datacollection-9f8f6.firebaseapp.com",
+            projectId: "datacollection-9f8f6",
+            storageBucket: "datacollection-9f8f6.appspot.com",
+            messagingSenderId: "171849859334",
+            appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
+            measurementId: "G-F2WDNKDP5R"
+          };
+          
+          // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
 </head>
 <body>
     <div class="navbar">
@@ -116,8 +137,9 @@
             </div>
         </form>
     </div>
+
     <script>
-        document.getElementById('consentForm').addEventListener('submit', function(event) {
+        document.getElementById('consentForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent form from submitting
     
             // Collect Consent Form Data
@@ -161,23 +183,29 @@
             }
     
             const basicInfoData = {
-                experience: experience || 'No selection',
-                location: location || 'No selection',
-                role: role || 'No selection',
-                specialty: specialty || 'No selection',
-                experience_years: experience_years || 'No selection'
+                experience: experience,
+                location: location,
+                role: role,
+                specialty: specialty,
+                experience_years: experience_years
             };
     
-            // Save Consent and Basic Info Data to localStorage
-            localStorage.setItem('consentData', JSON.stringify(consentData));
-            localStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
+            try {
+                // Save data to Firestore
+                const docRef = await db.collection('vital_signs_survey').add({
+                    consentData: consentData,
+                    basicInfoData: basicInfoData,
+                    timestamp: new Date()
+                });
     
-            // Debugging output to ensure proper storage
-            console.log('Consent Data: ', consentData);
-            console.log('Basic Info Data: ', basicInfoData);
+                console.log('Document written with ID: ', docRef.id);
     
-            // Now proceed to the next page
-            window.location.href = 'part1.html';
+                // Now proceed to the next page
+                window.location.href = 'part1.html';
+            } catch (e) {
+                console.error('Error adding document: ', e);
+                alert('There was an error saving your data. Please try again.');
+            }
         });
     </script>
 </body>
