@@ -127,6 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
             timestamp: new Date() // Add timestamp
         };
 
+        console.log(allData);
+
         // Save to Firestore
         db.collection('vital_signs_survey').add(allData)
             .then(docRef => {
