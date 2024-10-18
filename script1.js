@@ -557,3 +557,26 @@ submitButton.addEventListener('click', () => {
     alert('Your responses have been saved. Please proceed to Part 2.');
     window.location.href = 'part2.html';
 });
+
+// script1.js
+
+function collectData() {
+    const data = {};
+    data.thresholds = [];
+    vitalSignsData.forEach(vitalSign => {
+        const values = vitalSign.getValues();
+        data.thresholds.push({
+            'Vital Sign': vitalSign.name,
+            'Unit': vitalSign.unit,
+            'Values': values.join(';')
+        });
+    });
+
+    // Store data in localStorage (optional)
+    localStorage.setItem('part1Data', JSON.stringify(data));
+
+    // Send data to the global variable in dataStore.js
+    setCollectedData(data);
+
+    return data;
+}

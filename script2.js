@@ -14,7 +14,6 @@ const combinations = [
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }}
 ];
 
-
 function createCombinationElement(combination, index) {
     const container = document.createElement('div');
     container.className = 'combination';
@@ -53,7 +52,6 @@ function createCombinationElement(combination, index) {
     container.appendChild(table);
 
     // Slider for rating (0 to 10)
-    // Slider for rating (0 to 10)
     const sliderContainer = document.createElement('div');
     sliderContainer.className = 'slider-container';
 
@@ -76,11 +74,10 @@ function createCombinationElement(combination, index) {
 
     sliderInput.addEventListener('input', () => {
         sliderValueDisplay.textContent = sliderInput.value;
-        // Save value to localStorage whenever it changes
         saveData();
     });
 
-    // NEW: Load saved value if available
+    // Load saved value if available
     const savedData = JSON.parse(localStorage.getItem('part2Data'));
     if (savedData && savedData[index]) {
         sliderInput.value = savedData[index].Rating;
@@ -91,13 +88,6 @@ function createCombinationElement(combination, index) {
 
     return container;
 }
-
-const part2Container = document.getElementById('part2Container');
-
-combinations.forEach((combination, index) => {
-    const combinationElement = createCombinationElement(combination, index);
-    part2Container.appendChild(combinationElement);
-});
 
 function collectData() {
     // Collect ratings from Part 2
@@ -116,7 +106,7 @@ function collectData() {
     return part2Ratings;
 }
 
-// NEW: Function to save data whenever input changes
+// Save data whenever input changes
 function saveData() {
     collectData();
 }
@@ -124,10 +114,47 @@ function saveData() {
 // Save data when the page is unloaded (optional redundancy)
 window.addEventListener('beforeunload', saveData);
 
+const part2Container = document.getElementById('part2Container');
+combinations.forEach((combination, index) => {
+    const combinationElement = createCombinationElement(combination, index);
+    part2Container.appendChild(combinationElement);
+});
+
 const submitButton = document.getElementById('submitButton');
 submitButton.addEventListener('click', () => {
     const data = collectData();
-    // downloadCSV(data); // Optional: Remove or keep based on preference
     alert('Your responses have been saved. Please proceed to Part 3.');
     window.location.href = 'part3.html';
 });
+
+// Function to initialize Part 2 with data from Part 1
+function initPart2() {
+    // Retrieve the collected data from dataStore.js
+    const part1Data = getCollectedData();
+
+    // Check if data is available
+    if (!part1Data) {
+        alert('No data from Part 1 found. Please complete Part 1 first.');
+        window.location.href = 'part1.html';
+        return;
+    }
+
+    // Display thresholds from Part 1 in Part 2 (for demonstration purposes)
+    part1Data.thresholds.forEach(item => {
+        const combinationDiv = document.createElement('div');
+        combinationDiv.className = 'combination-item';
+
+        const title = document.createElement('h3');
+        title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
+        combinationDiv.appendChild(title);
+
+        const values = document.createElement('p');
+        values.textContent = `Thresholds: ${item['Values']}`;
+        combinationDiv.appendChild(values);
+
+        part2Container.appendChild(combinationDiv);
+    });
+}
+
+// Call the initialization function when the page loads
+window.onload = initPart2;
