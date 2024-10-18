@@ -525,23 +525,6 @@ function createVitalSignElement(vitalSign) {
     return container;
 }
 
-function collectData() {
-    const data = {};
-    data.thresholds = [];
-    vitalSignsData.forEach(vitalSign => {
-        const values = vitalSign.getValues();
-        data.thresholds.push({
-            'Vital Sign': vitalSign.name,
-            'Unit': vitalSign.unit,
-            'Values': values.join(';')
-        });
-    });
-
-    // Store data in localStorage
-    localStorage.setItem('part1Data', JSON.stringify(data));
-
-    return data;
-}
 
 const vitalSignsContainer = document.getElementById('vitalSignsContainer');
 
@@ -550,13 +533,16 @@ vitalSignsData.forEach(vitalSign => {
     vitalSignsContainer.appendChild(vitalSignElement);
 });
 
-const submitButton = document.getElementById('submitButton');
-submitButton.addEventListener('click', () => {
-    const data = collectData();
-    // downloadCSV(data); // Optional: Remove or keep based on preference
-    alert('Your responses have been saved. Please proceed to Part 2.');
-    window.location.href = 'part2.html';
-});
+if (submitButton) {
+    submitButton.addEventListener('click', () => {
+        console.log('Submit button clicked');
+        const data = collectData();
+        alert('Your responses have been saved. Please proceed to Part 2.');
+        window.location.href = 'part2.html';
+    });
+} else {
+    console.error('Submit button not found!');
+}
 
 // script1.js
 
@@ -580,3 +566,4 @@ function collectData() {
 
     return data;
 }
+
