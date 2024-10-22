@@ -129,8 +129,8 @@ submitButton.addEventListener('click', () => {
 
 // Function to initialize Part 2 with data from Part 1
 function initPart2() {
-    // Retrieve the collected data from dataStore.js
-    const part1Data = getCollectedData();
+    // Retrieve the collected data from localStorage
+    const part1Data = JSON.parse(localStorage.getItem('part1Data'));
 
     // Check if data is available
     if (!part1Data) {
@@ -139,7 +139,7 @@ function initPart2() {
         return;
     }
 
-    // Display thresholds from Part 1 in Part 2 (for demonstration purposes)
+    // Display thresholds from Part 1 in Part 2
     part1Data.thresholds.forEach(item => {
         const combinationDiv = document.createElement('div');
         combinationDiv.className = 'combination-item';

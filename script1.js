@@ -1,7 +1,6 @@
 // script1.js
 
 // Vital Signs Data
-// Vital Signs Data
 const vitalSignsData = [
     {
         name: "Heart Rate",
@@ -80,10 +79,10 @@ function createVitalSignElement(vitalSign) {
     const max = vitalSign.max;
 
     // Initialize thresholds at random positions
-    thresholds.push({ value: min, levelIndex: 0, lastAdjusted: false }); // thresholds[0] - fixed
+    thresholds.push({ value: min, levelIndex: 0 }); // thresholds[0] - fixed
     const positions = getInitialPositions(numArrows, min, max, vitalSign.step);
-    positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1, lastAdjusted: false }));
-    thresholds.push({ value: max, levelIndex: levels.length - 1, lastAdjusted: false }); // Last threshold - fixed
+    positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1 }));
+    thresholds.push({ value: max, levelIndex: levels.length - 1 }); // Last threshold - fixed
 
     // Add tick marks and labels
     const tickMarksContainer = document.createElement('div');
@@ -198,9 +197,10 @@ function createVitalSignElement(vitalSign) {
 
                 // Event listeners for thumb
                 let isDragging = false;
+                let currentThumbIndex;
+
                 thumb.addEventListener('mousedown', e => {
                     isDragging = true;
-                    currentThumb = thumb;
                     currentThumbIndex = parseInt(thumb.dataset.index);
                     document.addEventListener('mousemove', onMouseMove);
                     document.addEventListener('mouseup', onMouseUp);
@@ -217,17 +217,18 @@ function createVitalSignElement(vitalSign) {
 
                     // Snap to nearest step
                     value = Math.round(value / vitalSign.step) * vitalSign.step;
+
+                    // Enforce min and max
                     value = Math.max(min, Math.min(value, max));
 
+                    // Move current thumb
                     thresholds[currentThumbIndex].value = value;
 
-                    // Enforce boundaries
-                    enforceBoundaries(currentThumbIndex, value);
+                    // Enforce boundaries and push adjacent thumbs
+                    enforceBoundaries(currentThumbIndex);
 
-                    // Set lastAdjusted
-                    thresholds.forEach((t, idx) => {
-                        t.lastAdjusted = (idx === currentThumbIndex);
-                    });
+                    // Enforce minimum 'No concern' width
+                    enforceNoConcernWidth();
 
                     updatePositions();
                 }
@@ -247,32 +248,48 @@ function createVitalSignElement(vitalSign) {
             scaleContainer.appendChild(range);
             ranges.push(range);
         }
+
+        updatePositions();
     }
 
-    function enforceBoundaries(index, value) {
+    function enforceBoundaries(index) {
         const threshold = thresholds[index];
 
         // Ensure thresholds stay within min and max
-        if (value < min) {
-            threshold.value = min;
-        } else if (value > max) {
-            threshold.value = max;
-        } else {
-            threshold.value = value;
-        }
+        threshold.value = Math.max(min, Math.min(threshold.value, max));
 
-        // Prevent thresholds from crossing over
+        // Push adjacent thumbs if overlapping
         if (index > 0) {
-            if (thresholds[index - 1].value > threshold.value) {
-                thresholds[index - 1].value = threshold.value;
-                enforceBoundaries(index - 1, thresholds[index - 1].value);
+            if (thresholds[index - 1].value >= threshold.value) {
+                thresholds[index - 1].value = threshold.value - vitalSign.step;
+                enforceBoundaries(index - 1);
             }
         }
 
         if (index < thresholds.length - 1) {
-            if (thresholds[index + 1].value < threshold.value) {
-                thresholds[index + 1].value = threshold.value;
-                enforceBoundaries(index + 1, thresholds[index + 1].value);
+            if (thresholds[index + 1].value <= threshold.value) {
+                thresholds[index + 1].value = threshold.value + vitalSign.step;
+                enforceBoundaries(index + 1);
+            }
+        }
+    }
+
+    function enforceNoConcernWidth() {
+        const minNoConcernWidth = vitalSign.step * 1; // Adjust as needed
+
+        if (vitalSign.name === "Oxygen Saturation") {
+            // 'No concern' region is between thresholds[3] and max
+            const noConcernWidth = thresholds[thresholds.length - 1].value - thresholds[3].value;
+            if (noConcernWidth < minNoConcernWidth) {
+                thresholds[3].value = thresholds[thresholds.length - 1].value - minNoConcernWidth;
+                enforceBoundaries(thresholds.length - 2);
+            }
+        } else {
+            // 'No concern' region is between thresholds[3] and thresholds[4]
+            const noConcernWidth = thresholds[4].value - thresholds[3].value;
+            if (noConcernWidth < minNoConcernWidth) {
+                thresholds[3].value = thresholds[4].value - minNoConcernWidth;
+                enforceBoundaries(3);
             }
         }
     }
@@ -293,50 +310,28 @@ function createVitalSignElement(vitalSign) {
             }
         });
 
-        // Build merged ranges
-        const mergedRanges = [];
-        let i = 0;
-        while (i < thresholds.length - 1) {
-            let startThreshold = thresholds[i];
-            let endIndex = i + 1;
+        // Build ranges
+        const rangesData = [];
+        for (let i = 0; i < thresholds.length - 1; i++) {
+            const startValue = thresholds[i].value;
+            const endValue = thresholds[i + 1].value;
 
-            // Merge ranges where thresholds have the same value
-            while (endIndex < thresholds.length && thresholds[endIndex].value === thresholds[i].value) {
-                endIndex++;
-            }
-
-            // Determine concern level
-            let levelIndex = thresholds[i].levelIndex;
-            if (endIndex - i > 1) {
-                for (let j = i; j < endIndex; j++) {
-                    if (thresholds[j].lastAdjusted) {
-                        levelIndex = thresholds[j].levelIndex;
-                        break;
-                    }
-                }
-            }
-
-            // Create range
-            let startValue = thresholds[i].value;
-            let endValue = thresholds[endIndex] ? thresholds[endIndex].value : thresholds[thresholds.length - 1].value;
             let startPercent = ((startValue - min) / (max - min)) * 100;
             let endPercent = ((endValue - min) / (max - min)) * 100;
             let width = endPercent - startPercent;
 
-            mergedRanges.push({
+            rangesData.push({
                 left: startPercent,
                 width: width,
-                levelIndex: levelIndex
+                levelIndex: thresholds[i].levelIndex
             });
-
-            i = endIndex;
         }
 
         // Update ranges
         ranges.forEach(range => range.remove());
         ranges.length = 0;
 
-        mergedRanges.forEach(rangeData => {
+        rangesData.forEach(rangeData => {
             const range = document.createElement('div');
             range.className = 'range';
             range.style.left = `${rangeData.left}%`;
@@ -351,7 +346,7 @@ function createVitalSignElement(vitalSign) {
         updateTickMarksColor();
 
         // Update the table
-        updateThresholdTable(mergedRanges);
+        updateThresholdTable(rangesData);
     }
 
     function updateTickMarksColor() {
@@ -363,12 +358,12 @@ function createVitalSignElement(vitalSign) {
         });
     }
 
-    function updateThresholdTable(mergedRanges) {
+    function updateThresholdTable(rangesData) {
         // Clear existing table rows
         tableBody.innerHTML = '';
 
-        // For each merged range, create a table row
-        mergedRanges.forEach(rangeData => {
+        // For each range, create a table row
+        rangesData.forEach(rangeData => {
             const row = document.createElement('tr');
             const levelCell = document.createElement('td');
             levelCell.textContent = levels[rangeData.levelIndex].label;
@@ -425,10 +420,8 @@ function createVitalSignElement(vitalSign) {
     }
 
     function getTickColor(value, thresholds, levels) {
-        for (let i = 0; i < thresholds.length - 1; i++) {
-            const lowerLimit = thresholds[i].value;
-            const upperLimit = thresholds[i + 1].value;
-            if (value >= lowerLimit && value <= upperLimit) {
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (value >= thresholds[i].value) {
                 return levels[thresholds[i].levelIndex].color;
             }
         }
@@ -495,10 +488,10 @@ function createVitalSignElement(vitalSign) {
         }
     };
 
-    // NEW: Save thresholds to vitalSign object for later retrieval
+    // Save thresholds to vitalSign object for later retrieval
     vitalSign.thresholds = thresholds;
 
-    // NEW: Function to load saved data
+    // Function to load saved data
     function loadSavedData() {
         const savedData = JSON.parse(localStorage.getItem('part1Data'));
         if (savedData && savedData.thresholds) {
@@ -506,17 +499,19 @@ function createVitalSignElement(vitalSign) {
             if (vitalSignData && vitalSignData.Values) {
                 const savedValues = vitalSignData.Values.split(';').map(v => parseFloat(v));
                 // Reconstruct thresholds based on saved values
-                thresholds = [{ value: min, levelIndex: 0, lastAdjusted: false }];
+                thresholds = [{ value: min, levelIndex: 0 }];
 
                 savedValues.forEach((val, idx) => {
-                    thresholds.push({ value: val, levelIndex: idx + 1, lastAdjusted: false });
+                    thresholds.push({ value: val, levelIndex: idx + 1 });
                 });
 
-                thresholds.push({ value: max, levelIndex: levels.length - 1, lastAdjusted: false });
+                thresholds.push({ value: max, levelIndex: levels.length - 1 });
 
                 createThumbs();
                 updatePositions();
             }
+        } else {
+            createThumbs();
         }
     }
 
@@ -525,7 +520,6 @@ function createVitalSignElement(vitalSign) {
     return container;
 }
 
-
 const vitalSignsContainer = document.getElementById('vitalSignsContainer');
 
 vitalSignsData.forEach(vitalSign => {
@@ -533,22 +527,24 @@ vitalSignsData.forEach(vitalSign => {
     vitalSignsContainer.appendChild(vitalSignElement);
 });
 
+const submitButton = document.getElementById('submitButton');
+
 if (submitButton) {
     submitButton.addEventListener('click', () => {
-        console.log('Submit button clicked');
-        const data = collectData();
+        // Collect data and store it in localStorage
+        collectData();
         alert('Your responses have been saved. Please proceed to Part 2.');
+        // Navigate to the next page
         window.location.href = 'part2.html';
     });
 } else {
     console.error('Submit button not found!');
 }
 
-// script1.js
-
 function collectData() {
     const data = {};
     data.thresholds = [];
+
     vitalSignsData.forEach(vitalSign => {
         const values = vitalSign.getValues();
         data.thresholds.push({
@@ -558,12 +554,10 @@ function collectData() {
         });
     });
 
-    // Store data in localStorage (optional)
+    // Save data to localStorage
     localStorage.setItem('part1Data', JSON.stringify(data));
 
-    // Send data to the global variable in dataStore.js
-    setCollectedData(data);
+    console.log('Data collected and saved to localStorage:', data);
 
     return data;
 }
-
