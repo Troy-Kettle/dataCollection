@@ -92,6 +92,7 @@ a {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 .vital-sign h3 {
+    height: 90px;
     margin-top: 0;
     color: #3498db;
     font-size: 1.8em;
