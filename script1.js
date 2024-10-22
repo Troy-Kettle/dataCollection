@@ -61,10 +61,12 @@ function createVitalSignElement(vitalSign) {
 
     const scaleContainer = document.createElement('div');
     scaleContainer.className = 'scale-container';
+    scaleContainer.style.position = 'relative';
     container.appendChild(scaleContainer);
 
     const track = document.createElement('div');
     track.className = 'track';
+    track.style.position = 'relative';
     scaleContainer.appendChild(track);
 
     const ranges = [];
@@ -78,7 +80,7 @@ function createVitalSignElement(vitalSign) {
     const min = vitalSign.min;
     const max = vitalSign.max;
 
-    // Initialize thresholds at random positions
+    // Initialize thresholds at positions evenly distributed
     thresholds.push({ value: min, levelIndex: 0 }); // thresholds[0] - fixed
     const positions = getInitialPositions(numArrows, min, max, vitalSign.step);
     positions.forEach((pos, idx) => thresholds.push({ value: pos, levelIndex: idx + 1 }));
@@ -87,10 +89,12 @@ function createVitalSignElement(vitalSign) {
     // Add tick marks and labels
     const tickMarksContainer = document.createElement('div');
     tickMarksContainer.className = 'tick-marks';
+    tickMarksContainer.style.position = 'relative';
     scaleContainer.appendChild(tickMarksContainer);
 
     const labelsContainer = document.createElement('div');
     labelsContainer.className = 'labels';
+    labelsContainer.style.position = 'relative';
     scaleContainer.appendChild(labelsContainer);
 
     // Function to add tick marks and labels
@@ -98,35 +102,49 @@ function createVitalSignElement(vitalSign) {
         tickMarksContainer.innerHTML = '';
         labelsContainer.innerHTML = '';
 
-        const totalTicks = 100; // Total number of minor ticks
-        for (let i = 0; i <= totalTicks; i++) {
-            const percent = (i / totalTicks) * 100;
-            const value = min + (percent / 100) * (max - min);
+        const range = max - min;
+        const step = vitalSign.step;
+        const majorTick = vitalSign.majorTick;
+        const minorTickInterval = step;
+        const majorTickInterval = majorTick;
+
+        const totalMinorTicks = Math.round(range / minorTickInterval);
+        const totalMajorTicks = Math.round(range / majorTickInterval);
+
+        // Add minor ticks
+        for (let i = 0; i <= totalMinorTicks; i++) {
+            const value = min + i * minorTickInterval;
+            const percent = ((value - min) / range) * 100;
 
             const tick = document.createElement('div');
             tick.className = 'tick minor';
             tick.style.left = `${percent}%`;
+            tick.style.transform = 'translateX(-50%)';
+            tick.style.position = 'absolute';
             tick.dataset.value = value;
             tickMarksContainer.appendChild(tick);
         }
 
         // Add major ticks and labels
-        let currentValue = min;
-        while (currentValue <= max) {
-            const percent = ((currentValue - min) / (max - min)) * 100;
+        for (let i = 0; i <= totalMajorTicks; i++) {
+            const value = min + i * majorTickInterval;
+            const percent = ((value - min) / range) * 100;
 
             const tick = document.createElement('div');
             tick.className = 'tick major';
             tick.style.left = `${percent}%`;
-            tick.dataset.value = currentValue;
+            tick.style.transform = 'translateX(-50%)';
+            tick.style.position = 'absolute';
+            tick.dataset.value = value;
             tickMarksContainer.appendChild(tick);
 
             const label = document.createElement('span');
-            label.textContent = formatValueForLabel(currentValue, vitalSign);
+            label.className = 'label';
+            label.textContent = formatValueForLabel(value, vitalSign);
             label.style.left = `${percent}%`;
+            label.style.transform = 'translateX(-50%)';
+            label.style.position = 'absolute';
             labelsContainer.appendChild(label);
-
-            currentValue += vitalSign.majorTick;
         }
     }
 
@@ -185,6 +203,7 @@ function createVitalSignElement(vitalSign) {
                 const thumb = document.createElement('div');
                 thumb.className = `thumb ${level.thumbClass}`;
                 thumb.dataset.index = index;
+                thumb.style.position = 'absolute';
                 scaleContainer.appendChild(thumb);
                 thumbs.push(thumb);
 
@@ -192,6 +211,7 @@ function createVitalSignElement(vitalSign) {
                 const thumbLabel = document.createElement('div');
                 thumbLabel.className = `thumb-label ${level.thumbLabelClass}`;
                 thumbLabel.textContent = formatValue(threshold.value, vitalSign);
+                thumbLabel.style.position = 'absolute';
                 scaleContainer.appendChild(thumbLabel);
                 thumbLabels.push(thumbLabel);
 
@@ -227,9 +247,6 @@ function createVitalSignElement(vitalSign) {
                     // Enforce boundaries and push adjacent thumbs
                     enforceBoundaries(currentThumbIndex);
 
-                    // Enforce minimum 'No concern' width
-                    enforceNoConcernWidth();
-
                     updatePositions();
                 }
 
@@ -245,6 +262,7 @@ function createVitalSignElement(vitalSign) {
         for (let i = 0; i < thresholds.length - 1; i++) {
             const range = document.createElement('div');
             range.className = 'range';
+            range.style.position = 'absolute';
             scaleContainer.appendChild(range);
             ranges.push(range);
         }
@@ -274,26 +292,6 @@ function createVitalSignElement(vitalSign) {
         }
     }
 
-    function enforceNoConcernWidth() {
-        const minNoConcernWidth = vitalSign.step * 1; // Adjust as needed
-
-        if (vitalSign.name === "Oxygen Saturation") {
-            // 'No concern' region is between thresholds[3] and max
-            const noConcernWidth = thresholds[thresholds.length - 1].value - thresholds[3].value;
-            if (noConcernWidth < minNoConcernWidth) {
-                thresholds[3].value = thresholds[thresholds.length - 1].value - minNoConcernWidth;
-                enforceBoundaries(thresholds.length - 2);
-            }
-        } else {
-            // 'No concern' region is between thresholds[3] and thresholds[4]
-            const noConcernWidth = thresholds[4].value - thresholds[3].value;
-            if (noConcernWidth < minNoConcernWidth) {
-                thresholds[3].value = thresholds[4].value - minNoConcernWidth;
-                enforceBoundaries(3);
-            }
-        }
-    }
-
     function updatePositions() {
         // Update thumbs and labels
         thresholds.forEach((threshold, index) => {
@@ -301,10 +299,12 @@ function createVitalSignElement(vitalSign) {
                 const percent = ((threshold.value - min) / (max - min)) * 100;
                 const thumb = thumbs[index - 1];
                 thumb.style.left = `${percent}%`;
+                thumb.style.transform = 'translateX(-50%)';
 
                 // Update thumb label position and value
                 const thumbLabel = thumbLabels[index - 1];
                 thumbLabel.style.left = `${percent}%`;
+                thumbLabel.style.transform = 'translateX(-50%)';
                 thumbLabel.textContent = formatValue(threshold.value, vitalSign);
                 thumbLabel.style.display = 'block';
             }
@@ -337,7 +337,7 @@ function createVitalSignElement(vitalSign) {
             range.style.left = `${rangeData.left}%`;
             range.style.width = `${rangeData.width}%`;
             range.style.backgroundColor = levels[rangeData.levelIndex].color;
-            range.style.zIndex = 1;
+            range.style.position = 'absolute';
             scaleContainer.appendChild(range);
             ranges.push(range);
         });
@@ -385,17 +385,21 @@ function createVitalSignElement(vitalSign) {
     }
 
     function formatValue(value, vitalSign) {
-        if (vitalSign.unit === '℃') {
-            return value.toFixed(1);
-        } else if (vitalSign.unit === 'L/min') {
-            return value.toFixed(1);
-        } else {
-            return Math.round(value);
-        }
+        const decimals = getMaxDecimalDigits(vitalSign.step);
+        return value.toFixed(decimals);
     }
 
     function formatValueForLabel(value, vitalSign) {
         return formatValue(value, vitalSign);
+    }
+
+    function getMaxDecimalDigits(step) {
+        const stepString = step.toString();
+        if (stepString.includes('.')) {
+            return stepString.split('.')[1].length;
+        } else {
+            return 0;
+        }
     }
 
     function getConcernLevels(vitalSign) {
@@ -468,16 +472,18 @@ function createVitalSignElement(vitalSign) {
         }
     }
 
-    // Function to initialize arrows at random positions within the range
+    // Function to initialize arrows at positions evenly distributed within the range
     function getInitialPositions(numArrows, min, max, step) {
         const positions = [];
-        for (let i = 0; i < numArrows; i++) {
-            const randomValue = min + Math.random() * (max - min);
-            const snappedValue = Math.max(min, Math.min(Math.round(randomValue / step) * step, max));
-            positions.push(snappedValue);
+        const interval = (max - min) / (numArrows + 1);
+        for (let i = 1; i <= numArrows; i++) {
+            const position = min + i * interval;
+            // Snap to nearest step
+            const snappedPosition = Math.round(position / step) * step;
+            positions.push(snappedPosition);
         }
-        // Sort positions to prevent overlapping thresholds
-        return positions.sort((a, b) => a - b);
+        // Ensure positions are within bounds and sorted
+        return positions.map(pos => Math.max(min, Math.min(pos, max))).sort((a, b) => a - b);
     }
 
     vitalSign.getValues = function() {
@@ -509,6 +515,8 @@ function createVitalSignElement(vitalSign) {
 
                 createThumbs();
                 updatePositions();
+            } else {
+                createThumbs();
             }
         } else {
             createThumbs();

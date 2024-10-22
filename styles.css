@@ -30,6 +30,7 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added shadow */
 }
 .navbar h1 {
     color: #fff;
@@ -47,6 +48,24 @@ a {
 .navbar ul li a {
     color: #fff;
     font-size: 1em;
+    position: relative; /* For the hover effect */
+    transition: color 0.3s;
+}
+.navbar ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    background: #fff;
+    left: 0;
+    bottom: -5px;
+    transition: width 0.3s;
+}
+.navbar ul li a:hover {
+    color: #e0e0e0; /* Lighter shade on hover */
+}
+.navbar ul li a:hover::after {
+    width: 100%;
 }
 
 /* Progress Bar */
@@ -82,13 +101,13 @@ a {
 .scale-container {
     position: relative;
     margin: 60px 0 40px 0;
-    height: 120px; /* Increased to accommodate multiple arrow levels */
+    height: 160px; /* Increased to accommodate multiple arrow levels */
 }
 .track {
     position: relative;
     width: 100%;
     height: 12px;
-    background: #e0e0e0;
+    background: #ccc;
     border-radius: 6px;
     margin: 30px 0;
     cursor: pointer;
@@ -107,22 +126,19 @@ a {
     border-right: 12px solid transparent;
     transform: translateX(-50%);
     cursor: pointer;
-}
-.thumb-normal {
-    border-top: 18px solid #2ecc71; /* Green */
-    top: -18px;
-}
-.thumb-mild {
-    border-top: 18px solid #f1c40f; /* Yellow */
-    top: -36px;
-}
-.thumb-moderate {
-    border-top: 18px solid #e67e22; /* Orange */
-    top: -54px;
+    z-index: 3; /* Ensure thumbs are above other elements */
 }
 .thumb-severe {
     border-top: 18px solid #e74c3c; /* Red */
-    top: -72px;
+    top: -24px;
+}
+.thumb-moderate {
+    border-top: 18px solid #e67e22; /* Orange */
+    top: -42px;
+}
+.thumb-mild {
+    border-top: 18px solid #f1c40f; /* Yellow */
+    top: -60px;
 }
 .thumb-label {
     position: absolute;
@@ -133,24 +149,22 @@ a {
     padding: 5px 8px;
     border-radius: 4px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.thumb-label-normal {
-    top: -90px;
-}
-.thumb-label-mild {
-    top: -110px;
-}
-.thumb-label-moderate {
-    top: -130px;
+    z-index: 4; /* Ensure labels are above thumbs */
 }
 .thumb-label-severe {
-    top: -150px;
+    top: -70px;
+}
+.thumb-label-moderate {
+    top: -88px;
+}
+.thumb-label-mild {
+    top: -106px;
 }
 /* Tick Marks and Labels */
 .labels {
     position: absolute;
     width: 100%;
-    top: 40px;
+    top: 50px;
     font-size: 0.9em;
     pointer-events: none;
 }
@@ -163,24 +177,72 @@ a {
 .tick-marks {
     position: absolute;
     width: 100%;
-    top: 8px;
+    top: 20px;
     height: 16px;
     overflow: visible;
 }
+/* Tick Marks and Labels */
 .tick {
     position: absolute;
     width: 2px;
-    background-color: #999;
+    background-color: #444;
+    border-radius: 1px;
+    transform: translateX(-50%);
 }
+
+.labels span {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    color: #555;
+}
+
+/* Thumb Styles */
+.thumb {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    transform: translateX(-50%);
+    cursor: pointer;
+    z-index: 3;
+}
+
+/* Thumb Labels */
+.thumb-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.9em;
+    white-space: nowrap;
+    background: #fff;
+    padding: 5px 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 4;
+}
+
+/* Ensure Parent Containers are Positioned Correctly */
+.scale-container {
+    position: relative;
+}
+
+.track {
+    position: relative;
+}
+
+
 .tick.major {
     height: 16px;
 }
 .tick.minor {
     height: 10px;
 }
+
 /* Concern Levels */
 .concern-levels {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     margin-top: 50px;
 }
@@ -193,7 +255,7 @@ a {
     text-transform: uppercase;
     font-size: 1em;
     border-radius: 4px;
-    margin: 0 5px;
+    margin: 5px;
     opacity: 1;
 }
 .no-concern { background-color: #2ecc71; }
