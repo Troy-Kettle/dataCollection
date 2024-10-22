@@ -133,11 +133,11 @@ function initPart2() {
     const part1Data = JSON.parse(localStorage.getItem('part1Data'));
 
     // Check if data is available
-    if (!part1Data) {
-        alert('No data from Part 1 found. Please complete Part 1 first.');
-        window.location.href = 'part1.html';
-        return;
-    }
+    // if (!part1Data) {
+    //     alert('No data from Part 1 found. Please complete Part 1 first.');
+    //     window.location.href = 'part1.html';
+    //     return;
+    // }
 
     // Display thresholds from Part 1 in Part 2
     part1Data.thresholds.forEach(item => {
