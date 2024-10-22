@@ -56,7 +56,7 @@ function createCombinationElement(combination, index) {
     sliderContainer.className = 'slider-container';
 
     const sliderLabel = document.createElement('label');
-    sliderLabel.innerHTML = 'Rate your level of concern:<br>0 = No more concerning than the individual abnormalities<br>5 = Moderately more concerning than individual abnormalities<br>10 = The combination is very much more concerning than the individual abnormalities';
+    sliderLabel.innerHTML = 'Rate your level of concern:<br>0 = No more concerning <br>5 = Moderately more concerning<br>10 = Much more concerning';
     sliderContainer.appendChild(sliderLabel);
 
     const sliderInput = document.createElement('input');
@@ -139,21 +139,21 @@ function initPart2() {
     //     return;
     // }
 
-    // Display thresholds from Part 1 in Part 2
-    part1Data.thresholds.forEach(item => {
-        const combinationDiv = document.createElement('div');
-        combinationDiv.className = 'combination-item';
+// Display thresholds from Part 1 in Part 2 -THIS WORKS DO NOT DELETE
+    // part1Data.thresholds.forEach(item => {
+    //     const combinationDiv = document.createElement('div');
+    //     combinationDiv.className = 'combination-item';
 
-        const title = document.createElement('h3');
-        title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
-        combinationDiv.appendChild(title);
+    //     const title = document.createElement('h3');
+    //     title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
+    //     combinationDiv.appendChild(title);
 
-        const values = document.createElement('p');
-        values.textContent = `Thresholds: ${item['Values']}`;
-        combinationDiv.appendChild(values);
+    //     const values = document.createElement('p');
+    //     values.textContent = `Thresholds: ${item['Values']}`;
+    //     combinationDiv.appendChild(values);
 
-        part2Container.appendChild(combinationDiv);
-    });
+    //     part2Container.appendChild(combinationDiv);
+    // });
 }
 
 // Call the initialization function when the page loads

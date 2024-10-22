@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         questionSet.appendChild(title);
 
         const subheading = document.createElement('h4');
-        subheading.innerHTML = '0 = not at all important<br>5 = moderately important<br>10 = Extremely important:';
+        subheading.innerHTML = '0 = Not at all important<br>5 = Moderately important<br>10 = Extremely important';
         questionSet.appendChild(subheading);
 
         part3Questions.forEach(questionText => {

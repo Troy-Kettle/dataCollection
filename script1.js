@@ -47,6 +47,26 @@ const vitalSignsData = [
         majorTick: 5,
         hasBothDirections: false,
         reverseScale: true
+    },
+    {
+        name: "Inspired Oxygen ",
+        unit: "L/min",
+        min: 0,
+        max: 15,
+        step: 1,
+        majorTick: 5,
+        hasBothDirections: false,
+        reverseScale: true
+    },
+    {
+        name: "Inspired Oxygen",
+        unit: "%",
+        min: 20,
+        max: 100,
+        step: 1,
+        majorTick: 5,
+        hasBothDirections: false,
+        reverseScale: true
     }
 ];
 
