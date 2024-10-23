@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Systolic Blood Pressure", unit: "mmHg" },
         { name: "Respiratory Rate", unit: "breaths/min" },
         { name: "Temperature", unit: "℃" },
-        { name: "Oxygen Saturation", unit: "%" }
+        { name: "Oxygen Saturation", unit: "%" },
+        { name: "Inspired Oxygen", unit: "L/min" }
     ];
 
     const part3Questions = [

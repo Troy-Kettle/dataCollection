@@ -2,17 +2,49 @@
 
 // Part 2: Combinations of vital signs
 const combinations = [
+    // 1) High heart rate and low systolic blood pressure
     {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 2) High heart rate and high respiratory rate
     {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 3) High heart rate and low temperature
     {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 4) High heart rate and high temperature
+    {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: "Normal", abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "High", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 5) High heart rate and low oxygen saturations
     {'Heart Rate': { value: "High", abnormal: true }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+    
+    // 6) Low systolic blood pressure and high respiratory rate
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 7) Low systolic blood pressure and low temperature
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 8) Low systolic blood pressure and high temperature
+    {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "High", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 9) Low systolic blood pressure and low oxygen saturations
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Low', abnormal: true }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: 'Normal', abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+    
+    // 10) High respiratory rate and low temperature
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 11) High respiratory rate and high temperature
+    {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "High", abnormal: true }, 'Oxygen Saturation': { value: "Normal", abnormal: false }},
+    
+    // 12) High respiratory rate and low oxygen saturations
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "High", abnormal: true }, 'Temperature': { value: "Normal", abnormal: false }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
-    {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }}
+    
+    // 13) Low temperature and low oxygen saturations
+    {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "Low", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
+    
+    // 14) High temperature and low oxygen saturations
+    {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "High", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
 ];
+
 
 function createCombinationElement(combination, index) {
     const container = document.createElement('div');
